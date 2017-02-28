@@ -7,7 +7,6 @@ declare -r ERRLOG=$ROOT_DIR/scheduler.handler.error_log
 
 function main {
 	is_running
-	setup_directories
 	while true ; do
 		update
 		/bin/bash scheduler.sh
@@ -65,6 +64,7 @@ function is_running {
 		log 'process already running'
 		exit 1
 	else
+		setup_directories
 		touch "$ROOT_DIR/scheduler.handler.running"
 	fi
 }
