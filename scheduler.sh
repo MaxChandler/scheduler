@@ -139,6 +139,9 @@ function kill_processes {
 function start_processes {
 	if ! pgrep -u $USER "tmux" > /dev/null; then
 		tmux new-session -d -s $USER
+	elif ! tmux list-sessions | grep "$USER">/dev/null; then
+		# tmux is running, but the session $USER isn't running
+		tmux new-session -d -s $USER
 	fi
 
 	if ! pgrep -u $USER -x "MATLAB" > /dev/null ; then
