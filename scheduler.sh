@@ -5,7 +5,7 @@ declare -r CONTROL_DIR=/tmp/$USER/control/
 declare -r LOGFILE=$ROOT_DIR/scheduler.log
 declare -r ERRLOG=$ROOT_DIR/scheduler.error_log
 declare -r RESTRICTED_MACHINES=( "aluminium" "argon" "arsenic" "beryllium" "boron" "bromine" "calcium" "carbon" "chlorine" "chromium" "cobalt" "copper" "fluorine" "gallium" "germanium" "helium" "hydrogen" "iron" "krypton" "lithium" "magnesium" "manganese" "neon" "nickel" "niobium" "nitrogen" "oxygen" "phosphorus" "potassium" "rubidium" "scandium" "selenium" "silicon" "sodium" "strontium" "sulfur" "titanium" "vanadium" "yttrium" "zirconium" "zinc")
-declare -r PROCESS_COMMAND="matlab -nodisplay -r 'add_path_matlab;for ii = 1 : 10; pause(1); display(rand(1)); end; exit;'"
+declare -r PROCESS_COMMAND="matlab -nodisplay -r 'add_path_matlab; MRS_bound_b0_spectra_distance; exit;'"
 declare -r TMUX_WINDOW_NAME='scheduler'
 
 function is_running {
@@ -89,7 +89,7 @@ function setup_directories {
 
 function mount_sshfs {
 	if [ -z "$(ls -A $MRS_DIR)" ]; then
-		# sshfs max@ventoux.cs.cf.ac.uk:/media/raid/MRS_Data/ $MRS_DIR
+		sshfs max@ventoux.cs.cf.ac.uk:/media/raid/MRS_Data/ $MRS_DIR
 		log 'Mounted SSHFS'
 	fi
 }
