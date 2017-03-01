@@ -102,7 +102,7 @@ function unmount_sshfs {
 }
 
 function update_repository {
-	log 'updating code repository'
+	log "updating code repository : $CONTROL_DIR"
 	if ! pgrep -x "rsync" -u $USER > /dev/null; then
 		if ping -c 1 -w 3 mrs1.cs.cf.ac.uk &>/dev/null ; then
 			if is_restricted_machine ; then 
@@ -110,12 +110,14 @@ function update_repository {
 			else
 				rsync -r --delete --force max@mrs1.cs.cf.ac.uk:~/control/ $CONTROL_DIR
 			fi
+			log "rsyncing with : mrs1"
 		elif ping -c 1 -w 3 ventoux.cs.cf.ac.uk &>/dev/null ; then
 			if is_restricted_machine ; then	
 				nice -n 19 ionice -c2 -n7 rsync -r --delete --force max@ventoux.cs.cf.ac.uk:~/control/ $CONTROL_DIR
 			else
 				rsync -r --delete --force max@ventoux.cs.cf.ac.uk:~/control/ $CONTROL_DIR
 			fi
+			log "couldn't connect to mrs1 : rsyncing with : ventoux"
 		else
 			error_log 'Cannot contact mrs1 or ventoux to update repository'
 		fi
@@ -137,8 +139,8 @@ function kill_processes {
 }
 
 function start_processes {
-	if ! tmux list-sessions | grep "$USER">/dev/null; then
-		tmux new-session -d -s $USER
+	if ! tmux ls >/dev/null; then
+		tmux new-session -d
 		log "starting tmux session"
 	fi
 
@@ -146,14 +148,14 @@ function start_processes {
 		log 'MATLAB & tmux now running : starting job'
 		if ! tmux list-windows | grep "$window_name">/dev/null; then
 			log "starting tmux window with name : $window_name"
-			tmux new-window -t $USER -n "$window_name"
+			tmux new-window -n "$window_name"
 		fi
 		if is_restricted_machine ; then
-			log 'Restricted machine : running job with nice -n 19 & ionice -c 2 -n 7 : $PROCESS_COMMAND'
-			tmux send-keys -t $USER:$window_name "cd $CONTROL_DIR/QControl/; nice -n 19 ionice -c2 -n7 $PROCESS_COMMAND" C-m
+			log "Restricted machine : running job with nice -n 19 & ionice -c 2 -n 7 : $PROCESS_COMMAND"
+			tmux send-keys -t "$window_name" "cd $CONTROL_DIR/QControl/; nice -n 19 ionice -c2 -n7 $PROCESS_COMMAND" C-m
 		else
-			log 'Unrestricted machine : running job : $PROCESS_COMMAND'
-			tmux send-keys -t $USER:$window_name "cd $CONTROL_DIR/QControl/; $PROCESS_COMMAND" C-m
+			log "Unrestricted machine : running job : $PROCESS_COMMAND"
+			tmux send-keys -t "$window_name" "cd $CONTROL_DIR/QControl/; $PROCESS_COMMAND" C-m
 		fi
 	else
 		log 'MATLAB is already running : not starting another job!'
