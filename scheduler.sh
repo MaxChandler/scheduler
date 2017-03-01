@@ -90,14 +90,14 @@ function setup_directories {
 function mount_sshfs {
 	if [ -z "$(ls -A $MRS_DIR)" ]; then
 		sshfs max@ventoux.cs.cf.ac.uk:/media/raid/MRS_Data/ $MRS_DIR
-		log 'Mounted SSHFS'
+		log "Mounted ventoux SSHFS to $MRS_DIR"
 	fi
 }
 
 function unmount_sshfs {
 	if ! [ -z "$(ls -A $MRS_DIR)" ]; then
 		fusermount -u $MRS_DIR
-		log 'Unmounted SSHFS'
+		log "Unmounted SSHFS : $MRS_DIR"
 	fi
 }
 
@@ -130,9 +130,9 @@ function kill_processes {
 		pkill -u $USER "MATLAB"
 		log 'Killed MATLAB'
 	fi
-	if pgrep -u $USER "tmux" > /dev/null; then
-		tmux kill-window -t $USER:$window_name
-		log "killed tmux window $USER:$window_name"
+	if  tmux list-windows | grep "$TMUX_WINDOW_NAME">/dev/null; then
+		tmux kill-window -t $TMUX_WINDOW_NAME
+		log "killed tmux window $TMUX_WINDOW_NAME"
 	fi
 	unmount_sshfs
 	exit
@@ -146,16 +146,16 @@ function start_processes {
 
 	if ! pgrep -u $USER -x "MATLAB" > /dev/null ; then
 		log 'MATLAB & tmux now running : starting job'
-		if ! tmux list-windows | grep "$window_name">/dev/null; then
-			log "starting tmux window with name : $window_name"
-			tmux new-window -n "$window_name"
+		if ! tmux list-windows | grep "$TMUX_WINDOW_NAME">/dev/null; then
+			log "starting tmux window with name : $TMUX_WINDOW_NAME"
+			tmux new-window -n "$TMUX_WINDOW_NAME"
 		fi
 		if is_restricted_machine ; then
 			log "Restricted machine : running job with nice -n 19 & ionice -c 2 -n 7 : $PROCESS_COMMAND"
-			tmux send-keys -t "$window_name" "cd $CONTROL_DIR/QControl/; nice -n 19 ionice -c2 -n7 $PROCESS_COMMAND" C-m
+			tmux send-keys -t "$TMUX_WINDOW_NAME" "cd $CONTROL_DIR/QControl/; nice -n 19 ionice -c2 -n7 $PROCESS_COMMAND" C-m
 		else
 			log "Unrestricted machine : running job : $PROCESS_COMMAND"
-			tmux send-keys -t "$window_name" "cd $CONTROL_DIR/QControl/; $PROCESS_COMMAND" C-m
+			tmux send-keys -t "$TMUX_WINDOW_NAME" "cd $CONTROL_DIR/QControl/; $PROCESS_COMMAND" C-m
 		fi
 	else
 		log 'MATLAB is already running : not starting another job!'
