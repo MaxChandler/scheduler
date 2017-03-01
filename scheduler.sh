@@ -137,23 +137,22 @@ function kill_processes {
 }
 
 function start_processes {
-	if ! pgrep -u $USER "tmux" > /dev/null; then
+	if ! tmux list-sessions | grep "$USER">/dev/null; then
 		tmux new-session -d -s $USER
-	elif ! tmux list-sessions | grep "$USER">/dev/null; then
-		# tmux is running, but the session $USER isn't running
-		tmux new-session -d -s $USER
+		log "starting tmux session"
 	fi
 
 	if ! pgrep -u $USER -x "MATLAB" > /dev/null ; then
 		log 'MATLAB & tmux now running : starting job'
 		if ! tmux list-windows | grep "$window_name">/dev/null; then
+			log "starting tmux window with name : $window_name"
 			tmux new-window -t $USER -n "$window_name"
 		fi
 		if is_restricted_machine ; then
-			log 'Restricted machine : running job with nice -n 19 & ionice -c 2 -n 7'
+			log 'Restricted machine : running job with nice -n 19 & ionice -c 2 -n 7 : $PROCESS_COMMAND'
 			tmux send-keys -t $USER:$window_name "cd $CONTROL_DIR/QControl/; nice -n 19 ionice -c2 -n7 $PROCESS_COMMAND" C-m
 		else
-			log 'Unrestricted machine : running job'
+			log 'Unrestricted machine : running job : $PROCESS_COMMAND'
 			tmux send-keys -t $USER:$window_name "cd $CONTROL_DIR/QControl/; $PROCESS_COMMAND" C-m
 		fi
 	else
