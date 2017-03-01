@@ -10,6 +10,7 @@ function main {
 	while true ; do
 		update
 		/bin/bash scheduler.sh
+		sleep 120
 	done
 }
 
