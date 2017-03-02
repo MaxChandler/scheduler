@@ -49,6 +49,11 @@ function error_log {
 
 function check {
 	# consistency checks
+	# if there are pre-existing errors, then stop running
+	if [ -f $ERRLOG ]; then
+		exit
+	fi
+
 	# check to make sure we can access the servers we can connect too
 	ssh -q max@ventoux.cs.cf.ac.uk exit
 	if [[ $? != 0 ]] ; then
@@ -76,6 +81,12 @@ function check {
   		exit
 	elif ! type rsync >/dev/null 2>/dev/null; then
   		error_log "rsync is not installed"
+  		exit
+  	elif ! type ffmpeg >/dev/null 2>/dev/null; then
+  		error_log "ffpmeg is not installed"
+  		exit
+  	elif ! type povray >/dev/null 2>/dev/null; then
+  		error_log "povray is not installed"
   		exit
 	fi
 	setup_directories

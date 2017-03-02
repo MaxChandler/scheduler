@@ -8,6 +8,7 @@ declare -r ERRLOG=$ROOT_DIR/scheduler.handler.error_log
 function main {
 	is_running
 	while true ; do
+		check
 		update
 		/bin/bash scheduler.sh
 		sleep 120
@@ -20,6 +21,16 @@ function log {
 
 function error_log {
 	echo "[$(date)] : $1 " >> $ERRLOG
+}
+
+function check {
+	if [ -f $ERRLOG ]; then
+		echo "scheduler handler errors found : quitting"
+		exit
+	elif [ -f $ROOT_DIR/scheduler.error_log ]; then
+		echo "scheduler errors found : quitting"
+		exit
+	fi
 }
 
 function clear_log {
