@@ -190,7 +190,7 @@ function has_finished {
 
 function is_restricted_machine {
 	for machine in $RESTRICTED_MACHINES ; do
-		if [ "$machine" = "$HOSTNAME" ] ; then
+		if [[ "$machine" == "$HOSTNAME" ]]; then
 			return 0
 		fi
 	done
