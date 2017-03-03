@@ -16,11 +16,11 @@ function main {
 }
 
 function log {
-	echo "[$(date)] : $1 " >> $LOGFILE
+	echo "[$(date)] : $1 " | tee -a "$LOGFILE"
 }
 
 function error_log {
-	echo "[$(date)] : $1 " >> $ERRLOG
+	echo "[$(date)] : ERROR : $1 " | tee -a "$ERRLOG"
 }
 
 function check {
