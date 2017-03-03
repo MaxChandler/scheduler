@@ -39,6 +39,10 @@ function clear_log {
 	log "cleared old log file"
 }
 
+function warning_log {
+	log "WARNING : $1 "
+}
+
 function log {
 	echo "[$(date)] : $1 " | tee -a "$LOGFILE"
 }
@@ -83,11 +87,9 @@ function check {
   		error_log "rsync is not installed"
   		exit
   	elif ! type ffmpeg >/dev/null 2>/dev/null; then
-  		error_log "ffpmeg is not installed"
-  		exit
+  		warning_log "ffpmeg is not installed"
   	elif ! type povray >/dev/null 2>/dev/null; then
-  		error_log "povray is not installed"
-  		exit
+  		warning_log "povray is not installed"
 	fi
 	setup_directories
 }
@@ -116,19 +118,21 @@ function update_repository {
 	log "updating code repository : $CONTROL_DIR"
 	if ! pgrep -x "rsync" -u $USER > /dev/null; then
 		if ping -c 1 -w 3 mrs1.cs.cf.ac.uk &>/dev/null ; then
+			log "rsyncing with : mrs1"
 			if is_restricted_machine ; then 
+				log 'restricted  machine : nice and ionice used to rsync'
 				nice -n 19 ionice -c2 -n7 rsync -r --delete --force max@mrs1.cs.cf.ac.uk:~/control/ $CONTROL_DIR
 			else
 				rsync -r --delete --force max@mrs1.cs.cf.ac.uk:~/control/ $CONTROL_DIR
 			fi
-			log "rsyncing with : mrs1"
 		elif ping -c 1 -w 3 ventoux.cs.cf.ac.uk &>/dev/null ; then
+			log "couldn't connect to mrs1 : rsyncing with : ventoux"
 			if is_restricted_machine ; then	
+				log 'restricted  machine : nice and ionice used to rsync'
 				nice -n 19 ionice -c2 -n7 rsync -r --delete --force max@ventoux.cs.cf.ac.uk:~/control/ $CONTROL_DIR
 			else
 				rsync -r --delete --force max@ventoux.cs.cf.ac.uk:~/control/ $CONTROL_DIR
 			fi
-			log "couldn't connect to mrs1 : rsyncing with : ventoux"
 		else
 			error_log 'Cannot contact mrs1 or ventoux to update repository'
 		fi
