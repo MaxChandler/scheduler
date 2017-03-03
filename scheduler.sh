@@ -154,6 +154,8 @@ function kill_processes {
 }
 
 function start_processes {
+	mount_sshfs
+	update_repository
 	if ! tmux ls >/dev/null; then
 		tmux new-session -d
 		log "starting tmux session"
@@ -199,8 +201,6 @@ function main {
 	is_running
 	clear_log
 	check
-	mount_sshfs
-	update_repository
 	while true ; do
 		if is_restricted_machine ; then
 			log "Running on a machine that is restricted in computing time & resources"
