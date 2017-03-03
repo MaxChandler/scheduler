@@ -16,11 +16,11 @@ function main {
 }
 
 function log {
-	echo "[$(date)] : $1 " | tee -a "$LOGFILE"
+	echo "[$(date)] : scheduler_handler.sh : $1 " | tee -a "$LOGFILE"
 }
 
 function error_log {
-	echo "[$(date)] : ERROR : $1 " | tee -a "$ERRLOG"
+	echo "[$(date)] : scheduler_handler.sh :ERROR : $1 " | tee -a "$ERRLOG"
 }
 
 function check {
