@@ -205,13 +205,13 @@ function main {
 		if is_restricted_machine ; then
 			log "Running on a machine that is restricted in computing time & resources"
 			local H=$(date +%H)
-			if (( 8 <= 10#$H && 10#$H < 18 )); then 
-				# kill matlab, tmux and sshfs
-			    log 'between 8AM and 6PM : killing processes'
-			    kill_processes
-			else
+			# if (( 8 <= 10#$H && 10#$H < 18 )); then 
+			# 	# kill matlab, tmux and sshfs
+			#     log 'between 8AM and 6PM : killing processes'
+			#     kill_processes
+			# else
 				# start tmux, attach sshfs, update tmp and matlab
-				log 'between 8AM and 6PM'
+				# log 'between 8AM and 6PM'
 				num_users=$( who | sort --key=1,1 --unique | wc --lines )
 				if (( $num_users > 1 )); then
 					# kill everything
@@ -222,12 +222,12 @@ function main {
 					log 'one user logged in : starting process'
 					start_processes
 				fi
-			fi
+			# fi
 		else
 			log "Unrestricted machine : attempting to start process"
 			start_processes
 		fi
-		sleep 120
+		sleep 60
 		has_finished
 	done
 }
