@@ -4,7 +4,7 @@ declare -r MRS_DIR=/tmp/$USER/MRS_Data/
 declare -r CONTROL_DIR=/tmp/$USER/control/
 declare -r LOGFILE=$ROOT_DIR/scheduler.log
 declare -r ERRLOG=$ROOT_DIR/scheduler.error_log
-declare -r RESTRICTED_MACHINES=( "aluminium" "argon" "arsenic" "beryllium" "boron" "bromine" "calcium" "carbon" "chlorine" "chromium" "cobalt" "copper" "fluorine" "gallium" "germanium" "helium" "hydrogen" "iron" "krypton" "lithium" "magnesium" "manganese" "neon" "nickel" "niobium" "nitrogen" "oxygen" "phosphorus" "potassium" "rubidium" "scandium" "selenium" "silicon" "sodium" "strontium" "sulfur" "titanium" "vanadium" "yttrium" "zirconium" "zinc")
+declare -ra RESTRICTED_MACHINES=( "aluminium" "argon" "arsenic" "beryllium" "boron" "bromine" "calcium" "carbon" "chlorine" "chromium" "cobalt" "copper" "fluorine" "gallium" "germanium" "helium" "hydrogen" "iron" "krypton" "lithium" "magnesium" "manganese" "neon" "nickel" "niobium" "nitrogen" "oxygen" "phosphorus" "potassium" "rubidium" "scandium" "selenium" "silicon" "sodium" "strontium" "sulfur" "titanium" "vanadium" "yttrium" "zirconium" "zinc" )
 declare -r PROCESS_COMMAND="matlab -nodisplay -r 'add_path_matlab; MRS_bound_b0_spectra_distance; exit;'"
 declare -r TMUX_WINDOW_NAME='scheduler'
 
@@ -189,7 +189,7 @@ function has_finished {
 }
 
 function is_restricted_machine {
-	for machine in $RESTRICTED_MACHINES ; do
+	for machine in ${RESTRICTED_MACHINES[@]} ; do
 		if [[ "$machine" == "$HOSTNAME" ]]; then
 			return 0
 		fi
