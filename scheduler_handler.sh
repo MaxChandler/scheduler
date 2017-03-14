@@ -11,7 +11,7 @@ function main {
 		check
 		update
 		/bin/bash scheduler.sh
-		sleep 120
+		sleep $(( ( RANDOM % 600 )  + 1 ))
 	done
 }
 
