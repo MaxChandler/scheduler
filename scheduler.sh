@@ -7,6 +7,7 @@ declare -r ERRLOG=$ROOT_DIR/scheduler.error_log
 declare -a RESTRICTED_MACHINES=( "aluminium" "argon" "arsenic" "beryllium" "boron" "bromine" "calcium" "carbon" "chlorine" "chromium" "cobalt" "copper" "fluorine" "gallium" "germanium" "helium" "hydrogen" "iron" "krypton" "lithium" "magnesium" "manganese" "neon" "nickel" "niobium" "nitrogen" "oxygen" "phosphorus" "potassium" "rubidium" "scandium" "selenium" "silicon" "sodium" "strontium" "sulfur" "titanium" "vanadium" "yttrium" "zirconium" "zinc" )
 declare -r PROCESS_COMMAND="matlab -nodisplay -r 'add_path_matlab; MRS_bound_b0_spectra_distance; exit;'"
 declare -r TMUX_WINDOW_NAME='scheduler'
+declare -r RAM_LIMIT=90
 
 function is_running {
 	if [[ -f $ROOT_DIR/scheduler.running ]] ; then
@@ -34,6 +35,14 @@ function clean_up {
 	log "cleaned up from exit code : $?"
 }
 
+function log {
+	echo "[$(date)] : scheduler.sh : $1 " | tee -a "$LOGFILE"
+}
+
+function error_log {
+	echo "[$(date)] : scheduler.sh : ERROR : $1 " | tee -a "$ERRLOG"
+}
+
 function clear_log {
 	rm -f $LOGFILE
 	log "cleared old log file"
@@ -41,14 +50,6 @@ function clear_log {
 
 function warning_log {
 	log "WARNING : $1 "
-}
-
-function log {
-	echo "[$(date)] : scheduler.sh : $1 " | tee -a "$LOGFILE"
-}
-
-function error_log {
-	echo "[$(date)] : scheduler.sh : ERROR : $1 " | tee -a "$ERRLOG"
 }
 
 function check {
@@ -216,6 +217,9 @@ function main {
 				if (( $num_users > 1 )); then
 					# kill everything
 					log 'more than one user logged in : killing process'
+					kill_processes
+				elif [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $RAM_LIMIT ]] ; then
+					log "memory usage is higher than $RAM_LIMIT percent, killng process"
 					kill_processes
 				else
 					# start and run!
