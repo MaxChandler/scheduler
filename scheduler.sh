@@ -117,28 +117,32 @@ function unmount_sshfs {
 
 function update_repository {
 	log "updating code repository : $CONTROL_DIR"
-	if ! pgrep -x "rsync" -u $USER > /dev/null; then
-		if ping -c 1 -w 3 mrs1.cs.cf.ac.uk &>/dev/null ; then
-			log "rsyncing with : mrs1"
-			if is_restricted_machine ; then 
-				log 'restricted  machine : nice and ionice used to rsync'
-				nice -n 19 ionice -c2 -n7 rsync -r --delete --force max@mrs1.cs.cf.ac.uk:~/control/ $CONTROL_DIR
+	if pgrep -u $USER -x "MATLAB" > /dev/null ; then
+		if ! pgrep -x "rsync" -u $USER > /dev/null; then
+			if ping -c 1 -w 3 mrs1.cs.cf.ac.uk &>/dev/null ; then
+				log "rsyncing with : mrs1"
+				if is_restricted_machine ; then 
+					log 'restricted  machine : nice and ionice used to rsync'
+					nice -n 19 ionice -c2 -n7 rsync -r --delete --force max@mrs1.cs.cf.ac.uk:~/control/ $CONTROL_DIR
+				else
+					rsync -r --delete --force max@mrs1.cs.cf.ac.uk:~/control/ $CONTROL_DIR
+				fi
+			elif ping -c 1 -w 3 ventoux.cs.cf.ac.uk &>/dev/null ; then
+				log "couldn't connect to mrs1 : rsyncing with : ventoux"
+				if is_restricted_machine ; then	
+					log 'restricted  machine : nice and ionice used to rsync'
+					nice -n 19 ionice -c2 -n7 rsync -r --delete --force max@ventoux.cs.cf.ac.uk:~/control/ $CONTROL_DIR
+				else
+					rsync -r --delete --force max@ventoux.cs.cf.ac.uk:~/control/ $CONTROL_DIR
+				fi
 			else
-				rsync -r --delete --force max@mrs1.cs.cf.ac.uk:~/control/ $CONTROL_DIR
+				error_log 'Cannot contact mrs1 or ventoux to update repository'
 			fi
-		elif ping -c 1 -w 3 ventoux.cs.cf.ac.uk &>/dev/null ; then
-			log "couldn't connect to mrs1 : rsyncing with : ventoux"
-			if is_restricted_machine ; then	
-				log 'restricted  machine : nice and ionice used to rsync'
-				nice -n 19 ionice -c2 -n7 rsync -r --delete --force max@ventoux.cs.cf.ac.uk:~/control/ $CONTROL_DIR
-			else
-				rsync -r --delete --force max@ventoux.cs.cf.ac.uk:~/control/ $CONTROL_DIR
-			fi
-		else
-			error_log 'Cannot contact mrs1 or ventoux to update repository'
 		fi
+		log 'code updated successfully'
+	else
+		log 'matlab is running : not updating'
 	fi
-	log 'code updated successfully'
 }
 
 function kill_processes {
