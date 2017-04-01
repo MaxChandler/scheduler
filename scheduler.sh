@@ -117,7 +117,7 @@ function unmount_sshfs {
 
 function update_repository {
 	log "updating code repository : $CONTROL_DIR"
-	if pgrep -u $USER -x "MATLAB" > /dev/null ; then
+	if ! pgrep -u $USER -x "MATLAB" > /dev/null ; then
 		if ! pgrep -x "rsync" -u $USER > /dev/null; then
 			if ping -c 1 -w 3 mrs1.cs.cf.ac.uk &>/dev/null ; then
 				log "rsyncing with : mrs1"
