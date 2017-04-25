@@ -1,5 +1,5 @@
 #!/bin/bash
-declare -r ROOT_DIR=/tmp/$USER/
+declare ROOT_DIR=/tmp/$USER/
 declare -r CODE_DIR=~/control/
 declare -r SCRIPT_DIR=~/scripts/
 declare -r LOGFILE=$ROOT_DIR/scheduler.handler.log
