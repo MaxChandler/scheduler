@@ -1,6 +1,7 @@
 #!/bin/bash
 declare -r ROOT_DIR=/tmp/$USER/
-declare -r MRS_DIR=/tmp/$USER/MRS_Data/
+declare -r MRS_LOCAL_DIR=/tmp/$USER/MRS_Data/
+declare -r MRS_REMOTE_DIR=max@tourmalet.cs.cf.ac.uk:/home/max/MRS_Data/
 declare -r CONTROL_DIR=/tmp/$USER/control/
 declare -r LOGFILE=$ROOT_DIR/scheduler.log
 declare -r ERRLOG=$ROOT_DIR/scheduler.error_log
@@ -60,9 +61,9 @@ function check {
 	fi
 
 	# check to make sure we can access the servers we can connect too
-	ssh -q max@ventoux.cs.cf.ac.uk exit
+	ssh -q $MRS_REMOTE_DIR exit
 	if [[ $? != 0 ]] ; then
-		error_log 'cannot open ssh connection to ventoux, but can ping : setup keys'
+		error_log 'cannot open ssh connection to tourmalet, but can ping : setup keys'
 		exit
 	fi
 
@@ -96,22 +97,22 @@ function check {
 }
 
 function setup_directories {
-	mkdir -p $MRS_DIR
+	mkdir -p $MRS_LOCAL_DIR
 	chmod 700 $ROOT_DIR
-	log "setup directories : $MRS_DIR & $ROOT_DIR"
+	log "setup directories : $MRS_LOCAL_DIR & $ROOT_DIR"
 }
 
 function mount_sshfs {
-	if [ -z "$(ls -A $MRS_DIR)" ]; then
-		sshfs max@ventoux.cs.cf.ac.uk:/media/raid/MRS_Data/ $MRS_DIR
-		log "Mounted ventoux SSHFS to $MRS_DIR"
+	if [ -z "$(ls -A $MRS_LOCAL_DIR)" ]; then
+		sshfs $MRS_REMOTE_DIR $MRS_LOCAL_DIR
+		log "Mounted tourmalet SSHFS to $MRS_LOCAL_DIR"
 	fi
 }
 
 function unmount_sshfs {
-	if ! [ -z "$(ls -A $MRS_DIR)" ]; then
-		fusermount -u $MRS_DIR
-		log "Unmounted SSHFS : $MRS_DIR"
+	if ! [ -z "$(ls -A $MRS_LOCAL_DIR)" ]; then
+		fusermount -u $MRS_LOCAL_DIR
+		log "Unmounted SSHFS : $MRS_LOCAL_DIR"
 	fi
 }
 
@@ -127,16 +128,16 @@ function update_repository {
 				else
 					rsync -r --delete --force max@mrs1.cs.cf.ac.uk:~/control/ $CONTROL_DIR
 				fi
-			elif ping -c 1 -w 3 ventoux.cs.cf.ac.uk &>/dev/null ; then
-				log "couldn't connect to mrs1 : rsyncing with : ventoux"
+			elif ping -c 1 -w 3 tourmalet.cs.cf.ac.uk &>/dev/null ; then
+				log "couldn't connect to mrs1 : rsyncing with : tourmalet"
 				if is_restricted_machine ; then	
 					log 'restricted  machine : nice and ionice used to rsync'
-					nice -n 19 ionice -c2 -n7 rsync -r --delete --force max@ventoux.cs.cf.ac.uk:~/control/ $CONTROL_DIR
+					nice -n 19 ionice -c2 -n7 rsync -r --delete --force max@tourmalet.cs.cf.ac.uk:~/control/ $CONTROL_DIR
 				else
-					rsync -r --delete --force max@ventoux.cs.cf.ac.uk:~/control/ $CONTROL_DIR
+					rsync -r --delete --force max@tourmalet.cs.cf.ac.uk:~/control/ $CONTROL_DIR
 				fi
 			else
-				error_log 'Cannot contact mrs1 or ventoux to update repository'
+				error_log 'Cannot contact mrs1 or tourmalet to update repository'
 			fi
 		fi
 		log 'code updated successfully'

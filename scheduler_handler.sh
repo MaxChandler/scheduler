@@ -46,10 +46,10 @@ function setup_directories {
 function update {
 	if ping -c 1 mrs1.cs.cf.ac.uk &>/dev/null ; then
 		scp max@mrs1.cs.cf.ac.uk:~/scheduler/scheduler.sh $SCRIPT_DIR >/dev/null
-	elif ping -c 1 ventoux.cs.cf.ac.uk &>/dev/null ; then
-		scp max@ventoux.cs.cf.ac.uk:~/scheduler/scheduler.sh $SCRIPT_DIR >/dev/null
+	elif ping -c 1 tourmalet.cs.cf.ac.uk &>/dev/null ; then
+		scp max@tourmalet.cs.cf.ac.uk:~/scheduler/scheduler.sh $SCRIPT_DIR >/dev/null
 	else
-		error_log 'cannot connect to mrs1 or ventoux'
+		error_log 'cannot connect to mrs1 or tourmalet'
 	fi
 	log 'Updated scheduler.sh'
 }
