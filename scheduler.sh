@@ -119,7 +119,7 @@ function unmount_sshfs {
 
 function update_repository {
 	log "updating code repository : $CONTROL_DIR"
-	if ! pgrep -u $USER -x "MATLAB" > /dev/null ; then
+	if ! tmux list-windows | grep "$TMUX_WINDOW_NAME">/dev/null; then
 		if ! pgrep -x "rsync" -u $USER > /dev/null; then
 			if ping -c 1 -w 3 mrs1.cs.cf.ac.uk &>/dev/null ; then
 				log "rsyncing with : mrs1"
@@ -143,7 +143,7 @@ function update_repository {
 		fi
 		log 'code updated successfully'
 	else
-		log 'matlab is running : not updating'
+		log "\"$TMUX_WINDOW_NAME\" is open : not updating code in $$CONTROL_DIR"
 	fi
 }
 
@@ -168,12 +168,13 @@ function start_processes {
 		log "starting tmux session"
 	fi
 
-	if ! pgrep -u $USER -x "MATLAB" > /dev/null ; then
-		log 'MATLAB & tmux now running : starting job'
+	if ! tmux list-windows | grep "$TMUX_WINDOW_NAME">/dev/null; then
+		log "no \"$TMUX_WINDOW_NAME\" window found"
 		if ! tmux list-windows | grep "$TMUX_WINDOW_NAME">/dev/null; then
-			log "starting tmux window with name : $TMUX_WINDOW_NAME"
+			log "starting tmux window \"$TMUX_WINDOW_NAME\""
 			tmux new-window -n "$TMUX_WINDOW_NAME"
 		fi
+		log 'MATLAB & tmux now running : starting job'
 		if is_restricted_machine ; then
 			log "Restricted machine : running job with nice -n 19 & ionice -c 2 -n 7 : $PROCESS_COMMAND"
 			tmux send-keys -t "$TMUX_WINDOW_NAME" "cd $CONTROL_DIR/QControl/; nice -n 19 ionice -c2 -n7 $PROCESS_COMMAND" C-m
@@ -182,7 +183,7 @@ function start_processes {
 			tmux send-keys -t "$TMUX_WINDOW_NAME" "cd $CONTROL_DIR/QControl/; $PROCESS_COMMAND" C-m
 		fi
 	else
-		log 'MATLAB is already running : not starting another job!'
+		log 'tmux scheduler window is open : not starting another job! - check if window has paused'
 	fi
 }
 
