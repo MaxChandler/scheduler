@@ -1,7 +1,8 @@
 #!/bin/bash
 declare -r ROOT_DIR=/tmp/$USER/
 declare -r MRS_LOCAL_DIR=/tmp/$USER/MRS_Data/
-declare -r MRS_REMOTE_DIR=max@tourmalet.cs.cf.ac.uk:/home/max/MRS_Data/
+declare -r MRS_REMOTE_HOST=max@tourmalet.cs.cf.ac.uk
+declare -r MRS_REMOTE_DIR=/home/max/MRS_Data/
 declare -r CONTROL_DIR=/tmp/$USER/control/
 declare -r LOGFILE=$ROOT_DIR/scheduler.log
 declare -r ERRLOG=$ROOT_DIR/scheduler.error_log
@@ -61,7 +62,7 @@ function check {
 	fi
 
 	# check to make sure we can access the servers we can connect too
-	ssh -q $MRS_REMOTE_DIR exit
+	ssh -q $MRS_REMOTE_HOST exit
 	if [[ $? != 0 ]] ; then
 		error_log 'cannot open ssh connection to tourmalet, but can ping : setup keys'
 		exit
@@ -104,7 +105,7 @@ function setup_directories {
 
 function mount_sshfs {
 	if [ -z "$(ls -A $MRS_LOCAL_DIR)" ]; then
-		sshfs $MRS_REMOTE_DIR $MRS_LOCAL_DIR
+		sshfs $MRS_REMOTE_HOST:$MRS_REMOTE_DIR $MRS_LOCAL_DIR
 		log "Mounted tourmalet SSHFS to $MRS_LOCAL_DIR"
 	fi
 }
