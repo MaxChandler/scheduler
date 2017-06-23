@@ -13,10 +13,10 @@ declare -r RAM_LIMIT=90
 
 function is_running {
 	if [[ -f $ROOT_DIR/scheduler.running ]] ; then
-		log 'scheduler already running'
+		log 'already running'
 		exit 1
 	fi
-	log 'starting scheduler : no instance found'
+	log 'starting : no instance found'
 	touch "$ROOT_DIR/scheduler.running"
 }
 
@@ -38,11 +38,11 @@ function clean_up {
 }
 
 function log {
-	echo "[$(date)] : scheduler.sh : $1 " | tee -a "$LOGFILE"
+	echo "[$(date)] : log : scheduler : $1 " | tee -a "$LOGFILE"
 }
 
 function error_log {
-	echo "[$(date)] : scheduler.sh : ERROR : $1 " | tee -a "$ERRLOG"
+	echo "[$(date)] : ERR : scheduler : $1 " | tee -a "$ERRLOG"
 }
 
 function clear_log {
@@ -116,6 +116,14 @@ function update_repository {
 	fi
 }
 
+function pause_matlab {
+	kill -SIGSTOP $(pgrep -u $USER MATLAB)
+}
+
+function resume_matlab {
+	kill -SIGSTART $(pgrep -u $USER MATLAB)
+}
+
 function kill_processes {
 	if pgrep -u $USER "MATLAB" > /dev/null ; then
 		pkill -u $USER "MATLAB"
@@ -186,19 +194,20 @@ function main {
 			#     kill_processes
 			# else
 				# start tmux, update tmp and matlab
-				log 'between 8AM and 6PM'
+				# log 'between 8AM and 6PM'
+				start_processes
 				num_users=$( who | sort --key=1,1 --unique | wc --lines )
 				if (( $num_users > 1 )); then
 					# kill everything
-					log 'more than one user logged in : killing process'
-					kill_processes
+					log 'more than one user logged in : pausing process'
+					pause_matlab
 				elif [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $RAM_LIMIT ]] ; then
 					log "memory usage is higher than $RAM_LIMIT percent, killng process"
 					kill_processes
 				else
 					# start and run!
-					log 'one user logged in : starting process'
-					start_processes
+					log 'one user logged in : starting/resuming process'
+					resume_matlab
 				fi
 			# fi
 		else
