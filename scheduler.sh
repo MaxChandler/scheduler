@@ -106,10 +106,12 @@ function update_repository {
 
 function pause_matlab {
 	kill -SIGSTOP $(pgrep -u $USER MATLAB)
+	log 'matlab paused'
 }
 
 function resume_matlab {
 	kill -SIGSTART $(pgrep -u $USER MATLAB)
+	log 'matlab resumed'
 }
 
 function kill_processes {
@@ -173,34 +175,31 @@ function main {
 	clear_log
 	check
 	while true ; do
+		start_processes
 		if is_restricted_machine ; then
 			log "Running on a machine that is restricted in computing time & resources"
 			local H=$(date +%H)
-			# if (( 8 <= 10#$H && 10#$H < 18 )); then 
-			# 	# kill matlab and tmux
-			#     log 'between 8AM and 6PM : killing processes'
-			#     kill_processes
-			# else
-				# start tmux, update tmp and matlab
-				# log 'between 8AM and 6PM'
-				start_processes
+			if (( 8 <= 10#$H && 10#$H < 18 )); then 
+				log 'between 8AM and 6PM'
 				num_users=$( who | sort --key=1,1 --unique | wc --lines )
 				if (( $num_users > 1 )); then
 					# kill everything
 					log 'more than one user logged in : pausing process'
 					pause_matlab
-				elif [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $RAM_LIMIT ]] ; then
-					log "memory usage is higher than $RAM_LIMIT percent, killng process"
-					kill_processes
 				else
 					# start and run!
 					log 'one user logged in : starting/resuming process'
 					resume_matlab
 				fi
-			# fi
+			else
+				log 'between 8AM and 6PM'
+			fi
+			if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $RAM_LIMIT ]] ; then
+				log "memory usage is higher than $RAM_LIMIT percent, killng process"
+				kill_processes
+			fi
 		else
 			log "Unrestricted machine : attempting to start process"
-			start_processes
 		fi
 		sleep $(( ( RANDOM % 60 )  + 1 ))
 		has_finished
