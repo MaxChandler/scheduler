@@ -7,12 +7,11 @@ declare -r ERRLOG=$ROOT_DIR/scheduler.handler.error_log
 declare -r TMUX_WINDOW_NAME='scheduler'
 
 function is_running {
-	if [[ -f $ROOT_DIR/scheduler.handler.running ]] ; then
+	if (( $(pgrep -c -u $USER -f scheduler_handler.sh) > 1 )) ; then
 		log 'process already running'
 		kill_others
 	fi
 	log 'starting : no instance found'
-	touch "$ROOT_DIR/scheduler.handler.running"
 	setup_directories
 }
 
@@ -29,30 +28,35 @@ function main {
 function kill_others {
 	# kills process and children
 	while true; do
-		read -ep "Something has gone wrong or you're trying to start a second scheduler_handler, do you want to kill scheduler, scheduler_handler and associated MATLAB processes? [y/N] " yesno
+		read -ep "Something has gone wrong or you're trying to start a second scheduler_handler.
+Do you want to kill scheduler, scheduler_handler and associated MATLAB processes?
+[y/N] :" yesno
 		case $yesno in
 		    [Yy]* )
 				log "killing previous scheduler, scheduler_handler and MATLAB processes"
-				kill -SIGKILL $(pgrep -u $USER -f MATLAB)
-				kill -SIGKILL $(pgrep -u $USER -f scheduler.sh)
-				rm $ROOT_DIR/scheduler.*
-
-				ALL_SH_ID=$(pgrep -u $USER -f scheduler_handler.sh)
-				SH_ID=()
-
-				for ID in ALL_SH_ID; do
-					if $ID != $$; then
-						SH_ID+=($ID)
-					fi
-				done
-
-				kill -SIGKILL $SH_ID
-
-				if  tmux list-windows | grep "$TMUX_WINDOW_NAME">/dev/null; then
-					tmux kill-window -t $TMUX_WINDOW_NAME
-					log "killed tmux window $TMUX_WINDOW_NAME"
+				
+				if (( $(pgrep -c -u $USER -f scheduler.sh) > 0 )) ; then
+					kill -9 $m_id $(pgrep -u $USER -f scheduler.sh) &>/dev/null
 				fi
 
+				if (( $(pgrep -c -u $USER MATLAB) > 0 )) ; then
+					kill -9 $m_id $(pgrep -u $USER MATLAB) &>/dev/null
+				fi
+
+				if (( $(pgrep -c -u $USER tmux) > 0 )); then
+					echo 'YES'
+					if tmux list-windows | grep -q "scheduler"; then
+						tmux kill-window -t $TMUX_WINDOW_NAME
+						log "killed tmux window $TMUX_WINDOW_NAME"
+					fi
+				fi
+
+				rm -rf $ROOT_DIR/scheduler.*
+
+				if (( $(pgrep -c -u $USER -f scheduler_handler.sh) > 1 )); then
+					kill -9 $SH_ID $(pgrep -u $USER -f scheduler_handler.sh) &>/dev/null
+				fi
+				
 		        break;;
 		    	* )
 		        echo "Skipped"
@@ -90,8 +94,8 @@ function clear_log {
 }
 
 function setup_directories {
-	mkdir -p $ROOT_DIR
-	chmod 700 $ROOT_DIR
+	mkdir -p $ROOT_DIR > /dev/null
+	chmod 700 $ROOT_DIR > /dev/null
 }
 
 function update {
@@ -104,24 +108,11 @@ function update {
 }
 
 function clean_up_exit {
-	# if we have exit code 1, it's because the script has been called when it's already running. We don't want to remove the lockfile!
 	local exit_code=$?
-	if [[ $exit_code == 0 ]] ; then
-		rm -f "$ROOT_DIR/scheduler.running"
-		log "removed lock file"
-	else
-		log "lock file left in place"
-	fi
 	log "Stopped with exit code : $exit_code"
 }
 
-function clean_up {
-	rm -f "$ROOT_DIR/scheduler.handler.running"
-	exit
-}
-
 # catch everything but an exit
-trap clean_up INT TERM SIGHUP SIGINT SIGTERM SIGQUIT
 trap clean_up_exit EXIT 
 
 main "$@"

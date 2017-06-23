@@ -12,29 +12,16 @@ declare -r TMUX_WINDOW_NAME='scheduler'
 declare -r RAM_LIMIT=90
 
 function is_running {
-	if [[ -f $ROOT_DIR/scheduler.running ]] ; then
+	if (( $(pgrep -c -u $USER -f scheduler.sh) > 1 )) ; then
 		log 'already running'
 		exit 1
 	fi
 	log 'starting : no instance found'
-	touch "$ROOT_DIR/scheduler.running"
 }
 
 function clean_up_exit {
-	# if we have exit code 1, it's because the script has been called when it's already running. We don't want to remove the lockfile!
 	local exit_code=$?
-	if [[ $exit_code == 0 ]] ; then
-		rm -f "$ROOT_DIR/scheduler.running"
-		log "removed lock file"
-	else
-		log "lock file left in place"
-	fi
 	log "Stopped with exit code : $exit_code"
-}
-
-function clean_up {
-	rm -f "$ROOT_DIR/scheduler.running"
-	log "cleaned up from exit code : $?"
 }
 
 function log {
@@ -58,12 +45,13 @@ function check {
 	# consistency checks
 	# if there are pre-existing errors, then stop running
 	if [ -f $ERRLOG ]; then
+		error_log 'Errors found, exiting'
 		exit
 	fi
 
 	# check to make sure we can access the servers we can connect too
 	ssh -q $MRS_REMOTE_HOST exit
-	if [[ $? != 0 ]] ; then
+	if (( $? != 0 )) ; then
 		error_log 'cannot open ssh connection to tourmalet, but can ping : setup keys'
 		exit
 	fi
@@ -219,6 +207,5 @@ function main {
 	done
 }
 
-trap clean_up INT TERM SIGHUP SIGINT SIGTERM SIGQUIT
 trap clean_up_exit EXIT
 main "$@"
