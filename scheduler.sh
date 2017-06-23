@@ -170,6 +170,25 @@ function is_restricted_machine {
 	return 1
 }
 
+function relax {
+    num_users=$( who | sort --key=1,1 --unique | wc --lines )
+    if (( $num_users > 1 )); then
+        log 'More than one user'
+        if command -v >/dev/null ; then
+            log 'Lun installed'
+            if $(lun | grep -q 'bsc') || $(lun | grep -q 'masters') || $(lun | grep -q 'staff'); then
+				log 'relaxing'
+				return 0
+            fi
+		else
+			log 'relaxing'
+		    return 0
+		fi
+    fi
+    log 'no need to relax'
+    return 1
+}
+
 function main {
 	is_running
 	clear_log
@@ -181,14 +200,9 @@ function main {
 			local H=$(date +%H)
 			if (( 8 <= 10#$H && 10#$H < 18 )); then 
 				log 'between 8AM and 6PM'
-				num_users=$( who | sort --key=1,1 --unique | wc --lines )
-				if (( $num_users > 1 )); then
-					# kill everything
-					log 'more than one user logged in : pausing process'
+				if relax ; then
 					pause_matlab
 				else
-					# start and run!
-					log 'one user logged in : starting/resuming process'
 					resume_matlab
 				fi
 			else
