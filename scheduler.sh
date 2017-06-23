@@ -5,7 +5,7 @@ declare -r CONTROL_DIR=/tmp/$USER/control/
 declare -r LOGFILE=$ROOT_DIR/scheduler.log
 declare -r ERRLOG=$ROOT_DIR/scheduler.error_log
 declare -a RESTRICTED_MACHINES=( "aluminium" "argon" "arsenic" "beryllium" "boron" "bromine" "calcium" "carbon" "chlorine" "chromium" "cobalt" "copper" "fluorine" "gallium" "germanium" "helium" "hydrogen" "iron" "krypton" "lithium" "magnesium" "manganese" "neon" "nickel" "niobium" "nitrogen" "oxygen" "phosphorus" "potassium" "rubidium" "scandium" "selenium" "silicon" "sodium" "strontium" "sulfur" "titanium" "vanadium" "yttrium" "zirconium" "zinc" )
-declare -r PROCESS_COMMAND="matlab -nodisplay -r 'add_path_matlab; MRS_bound_b0_spectra_distance_flipangle_test; exit;'"
+declare -r PROCESS_COMMAND="matlab -nodisplay -r 'add_path_matlab; j = Job(); j.get_and_execute(); exit;'"
 declare -r TMUX_WINDOW_NAME='scheduler'
 declare -r RAM_LIMIT=90
 
@@ -60,19 +60,13 @@ function check {
 	fi
 
 	# check to make sure we can access the servers we can connect too
-	ssh -q max@ventoux.cs.cf.ac.uk exit
+	ssh -q max@tourmalet.cs.cf.ac.uk exit
 	if [[ $? != 0 ]] ; then
-		error_log 'cannot open ssh connection to ventoux, but can ping : setup keys'
+		error_log 'cannot open ssh connection to tourmalet, but can ping : setup keys'
 		exit
 	fi
 
-	ssh -q max@mrs1.cs.cf.ac.uk exit
-	if [[ $? != 0 ]] ; then
-		error_log 'cannot open ssh connection to mrs1, but can ping : setup keys'
-		exit
-	fi
-
-	# assumed that if you reach here, you can access one of the servers
+	# assumed that if you reach here, you can access the servers
 
 	# make sure all the programs we need are installed!
 	if ! type tmux >/dev/null 2>/dev/null; then
@@ -80,9 +74,6 @@ function check {
   		exit
 	elif ! type matlab >/dev/null 2>/dev/null; then
   		error_log "matlab is not installed"
-  		exit
-	elif ! type sshfs >/dev/null 2>/dev/null; then
-  		error_log "sshfs is not installed"
   		exit
 	elif ! type rsync >/dev/null 2>/dev/null; then
   		error_log "rsync is not installed"
@@ -101,42 +92,20 @@ function setup_directories {
 	log "setup directories : $MRS_DIR & $ROOT_DIR"
 }
 
-function mount_sshfs {
-	if [ -z "$(ls -A $MRS_DIR)" ]; then
-		sshfs max@ventoux.cs.cf.ac.uk:/media/raid/MRS_Data/ $MRS_DIR
-		log "Mounted ventoux SSHFS to $MRS_DIR"
-	fi
-}
-
-function unmount_sshfs {
-	if ! [ -z "$(ls -A $MRS_DIR)" ]; then
-		fusermount -u $MRS_DIR
-		log "Unmounted SSHFS : $MRS_DIR"
-	fi
-}
-
 function update_repository {
 	log "updating code repository : $CONTROL_DIR"
 	if ! pgrep -u $USER -x "MATLAB" > /dev/null ; then
 		if ! pgrep -x "rsync" -u $USER > /dev/null; then
-			if ping -c 1 -w 3 mrs1.cs.cf.ac.uk &>/dev/null ; then
-				log "rsyncing with : mrs1"
+			if ping -c 1 -w 3 tourmalet.cs.cf.ac.uk &>/dev/null ; then
+				log "rsyncing with : tourmalet"
 				if is_restricted_machine ; then 
 					log 'restricted  machine : nice and ionice used to rsync'
-					nice -n 19 ionice -c2 -n7 rsync -r --delete --force max@mrs1.cs.cf.ac.uk:~/control/ $CONTROL_DIR
+					nice -n 19 ionice -c2 -n7 rsync -r --delete --force max@tourmalet.cs.cf.ac.uk:~/control/ $CONTROL_DIR
 				else
-					rsync -r --delete --force max@mrs1.cs.cf.ac.uk:~/control/ $CONTROL_DIR
-				fi
-			elif ping -c 1 -w 3 ventoux.cs.cf.ac.uk &>/dev/null ; then
-				log "couldn't connect to mrs1 : rsyncing with : ventoux"
-				if is_restricted_machine ; then	
-					log 'restricted  machine : nice and ionice used to rsync'
-					nice -n 19 ionice -c2 -n7 rsync -r --delete --force max@ventoux.cs.cf.ac.uk:~/control/ $CONTROL_DIR
-				else
-					rsync -r --delete --force max@ventoux.cs.cf.ac.uk:~/control/ $CONTROL_DIR
+					rsync -r --delete --force max@tourmalet.cs.cf.ac.uk:~/control/ $CONTROL_DIR
 				fi
 			else
-				error_log 'Cannot contact mrs1 or ventoux to update repository'
+				error_log 'Cannot contact tourmalet to update repository'
 			fi
 		fi
 		log 'code updated successfully'
@@ -154,12 +123,10 @@ function kill_processes {
 		tmux kill-window -t $TMUX_WINDOW_NAME
 		log "killed tmux window $TMUX_WINDOW_NAME"
 	fi
-	unmount_sshfs
 	exit
 }
 
 function start_processes {
-	mount_sshfs
 	update_repository
 	if ! tmux ls >/dev/null; then
 		tmux new-session -d
@@ -211,12 +178,12 @@ function main {
 			log "Running on a machine that is restricted in computing time & resources"
 			local H=$(date +%H)
 			# if (( 8 <= 10#$H && 10#$H < 18 )); then 
-			# 	# kill matlab, tmux and sshfs
+			# 	# kill matlab and tmux
 			#     log 'between 8AM and 6PM : killing processes'
 			#     kill_processes
 			# else
-				# start tmux, attach sshfs, update tmp and matlab
-				# log 'between 8AM and 6PM'
+				# start tmux, update tmp and matlab
+				log 'between 8AM and 6PM'
 				num_users=$( who | sort --key=1,1 --unique | wc --lines )
 				if (( $num_users > 1 )); then
 					# kill everything
