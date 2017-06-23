@@ -1,5 +1,5 @@
 #!/bin/bash
-declare -r ROOT_DIR=/tmp/$USER/
+declare ROOT_DIR=/tmp/$USER/
 declare -r CODE_DIR=~/control/
 declare -r SCRIPT_DIR=~/scripts/
 declare -r LOGFILE=$ROOT_DIR/scheduler.handler.log
@@ -46,8 +46,6 @@ function setup_directories {
 function update {
 	if ping -c 1 tourmalet.cs.cf.ac.uk &>/dev/null ; then
 		scp max@tourmalet.cs.cf.ac.uk:~/scheduler/scheduler.sh $SCRIPT_DIR >/dev/null
-	# elif ping -c 1 ventoux.cs.cf.ac.uk &>/dev/null ; then
-	# 	scp max@ventoux.cs.cf.ac.uk:~/scheduler/scheduler.sh $SCRIPT_DIR >/dev/null
 	else
 		error_log 'cannot connect to tourmalet'
 	fi

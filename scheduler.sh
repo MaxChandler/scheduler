@@ -1,6 +1,8 @@
 #!/bin/bash
 declare -r ROOT_DIR=/tmp/$USER/
-declare -r MRS_DIR=/tmp/$USER/MRS_Data/
+declare -r MRS_LOCAL_DIR=/tmp/$USER/MRS_Data/
+declare -r MRS_REMOTE_HOST=max@tourmalet.cs.cf.ac.uk
+declare -r MRS_REMOTE_DIR=/home/max/MRS_Data/
 declare -r CONTROL_DIR=/tmp/$USER/control/
 declare -r LOGFILE=$ROOT_DIR/scheduler.log
 declare -r ERRLOG=$ROOT_DIR/scheduler.error_log
@@ -60,7 +62,7 @@ function check {
 	fi
 
 	# check to make sure we can access the servers we can connect too
-	ssh -q max@tourmalet.cs.cf.ac.uk exit
+	ssh -q $MRS_REMOTE_HOST exit
 	if [[ $? != 0 ]] ; then
 		error_log 'cannot open ssh connection to tourmalet, but can ping : setup keys'
 		exit
@@ -87,22 +89,22 @@ function check {
 }
 
 function setup_directories {
-	mkdir -p $MRS_DIR
+	mkdir -p $MRS_LOCAL_DIR
 	chmod 700 $ROOT_DIR
-	log "setup directories : $MRS_DIR & $ROOT_DIR"
+	log "setup directories : $MRS_LOCAL_DIR & $ROOT_DIR"
 }
 
 function update_repository {
 	log "updating code repository : $CONTROL_DIR"
-	if ! pgrep -u $USER -x "MATLAB" > /dev/null ; then
+	if ! tmux list-windows | grep "$TMUX_WINDOW_NAME">/dev/null; then
 		if ! pgrep -x "rsync" -u $USER > /dev/null; then
 			if ping -c 1 -w 3 tourmalet.cs.cf.ac.uk &>/dev/null ; then
 				log "rsyncing with : tourmalet"
 				if is_restricted_machine ; then 
 					log 'restricted  machine : nice and ionice used to rsync'
-					nice -n 19 ionice -c2 -n7 rsync -r --delete --force max@tourmalet.cs.cf.ac.uk:~/control/ $CONTROL_DIR
+					nice -n 19 ionice -c2 -n7 rsync -r --delete --force $MRS_REMOTE_HOST:~/control/ $CONTROL_DIR
 				else
-					rsync -r --delete --force max@tourmalet.cs.cf.ac.uk:~/control/ $CONTROL_DIR
+					rsync -r --delete --force $MRS_REMOTE_HOST:~/control/ $CONTROL_DIR
 				fi
 			else
 				error_log 'Cannot contact tourmalet to update repository'
@@ -110,7 +112,7 @@ function update_repository {
 		fi
 		log 'code updated successfully'
 	else
-		log 'matlab is running : not updating'
+		log "\"$TMUX_WINDOW_NAME\" is open : not updating code in $$CONTROL_DIR"
 	fi
 }
 
@@ -133,12 +135,13 @@ function start_processes {
 		log "starting tmux session"
 	fi
 
-	if ! pgrep -u $USER -x "MATLAB" > /dev/null ; then
-		log 'MATLAB & tmux now running : starting job'
+	if ! tmux list-windows | grep "$TMUX_WINDOW_NAME">/dev/null; then
+		log "no \"$TMUX_WINDOW_NAME\" window found"
 		if ! tmux list-windows | grep "$TMUX_WINDOW_NAME">/dev/null; then
-			log "starting tmux window with name : $TMUX_WINDOW_NAME"
+			log "starting tmux window \"$TMUX_WINDOW_NAME\""
 			tmux new-window -n "$TMUX_WINDOW_NAME"
 		fi
+		log 'MATLAB & tmux now running : starting job'
 		if is_restricted_machine ; then
 			log "Restricted machine : running job with nice -n 19 & ionice -c 2 -n 7 : $PROCESS_COMMAND"
 			tmux send-keys -t "$TMUX_WINDOW_NAME" "cd $CONTROL_DIR/QControl/; nice -n 19 ionice -c2 -n7 $PROCESS_COMMAND" C-m
@@ -147,7 +150,7 @@ function start_processes {
 			tmux send-keys -t "$TMUX_WINDOW_NAME" "cd $CONTROL_DIR/QControl/; $PROCESS_COMMAND" C-m
 		fi
 	else
-		log 'MATLAB is already running : not starting another job!'
+		log 'tmux scheduler window is open : not starting another job! - check if window has paused'
 	fi
 }
 
