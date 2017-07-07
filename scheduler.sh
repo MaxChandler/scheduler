@@ -110,7 +110,7 @@ function pause_matlab {
 }
 
 function resume_matlab {
-	kill -SIGSTART $(pgrep -u $USER MATLAB)
+	kill -SIGCONT $(pgrep -u $USER MATLAB)
 	log 'matlab resumed'
 }
 
