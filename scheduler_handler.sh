@@ -17,6 +17,7 @@ function is_running {
 
 function main {
 	is_running
+	clear_logs
 	while true ; do
 		check
 		update
@@ -88,9 +89,10 @@ function check {
 	fi
 }
 
-function clear_log {
+function clear_logs {
 	rm -f $LOGFILE
-	log "cleared old log file"
+	rm -f $ERRLOG
+	log "cleared old log files"
 }
 
 function setup_directories {
