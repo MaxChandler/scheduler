@@ -36,11 +36,11 @@ Do you want to kill scheduler, scheduler_handler and associated MATLAB processes
 				log "killing previous scheduler, scheduler_handler and MATLAB processes"
 				
 				if (( $(pgrep -c -u $USER -f scheduler.sh) > 0 )) ; then
-					kill -9 $m_id $(pgrep -u $USER -f scheduler.sh) &>/dev/null
+					kill -9 $(pgrep -u $USER -f scheduler.sh) &>/dev/null
 				fi
 
 				if (( $(pgrep -c -u $USER MATLAB) > 0 )) ; then
-					kill -9 $m_id $(pgrep -u $USER MATLAB) &>/dev/null
+					kill -9 $(pgrep -u $USER MATLAB) &>/dev/null
 				fi
 
 				if (( $(pgrep -c -u $USER tmux) > 0 )); then
