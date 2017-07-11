@@ -49,12 +49,12 @@ function check {
 		exit
 	fi
 
-	# check to make sure we can access the servers we can connect too
-	ssh -q $MRS_REMOTE_HOST exit
-	if (( $? != 0 )) ; then
-		error_log 'cannot open ssh connection to tourmalet, but can ping : setup keys'
-		exit
-	fi
+	# # check to make sure we can access the servers we can connect too
+	# ssh -q $MRS_REMOTE_HOST exit
+	# if (( $? != 0 )) ; then
+	# 	error_log 'cannot open ssh connection to tourmalet, but can ping : setup keys'
+	# 	exit
+	# fi
 
 	# assumed that if you reach here, you can access the servers
 
