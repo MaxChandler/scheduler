@@ -90,9 +90,9 @@ function update_repository {
 				log "rsyncing with : tourmalet"
 				if is_restricted_machine ; then 
 					log 'restricted  machine : nice and ionice used to rsync'
-					nice -n 19 ionice -c2 -n7 rsync -r --exclude='.git/' --delete --force $MRS_REMOTE_HOST:~/control/ $CONTROL_DIR
+					nice -n 19 ionice -c2 -n7 rsync -r --delete --force $MRS_REMOTE_HOST:~/control/ $CONTROL_DIR
 				else
-					rsync -r --exclude='.git/' --delete --force $MRS_REMOTE_HOST:~/control/ $CONTROL_DIR
+					rsync -r --delete --force $MRS_REMOTE_HOST:~/control/ $CONTROL_DIR
 				fi
 			else
 				error_log 'Cannot contact tourmalet to update repository'
