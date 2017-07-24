@@ -7,6 +7,6 @@ if !(( $(pgrep -c -u $USER -f scheduler_handler.sh) > 1 )) ; then
 		tmux new-session -d 
 		# start new tmux session
 		tmux new-window -n "$TMUX_WINDOW_NAME"
-		tmux send-keys -t "$TMUX_WINDOW_NAME" "./home/$USER/scripts/scheduler_handler.sh" C-m
+		tmux send-keys -t "$TMUX_WINDOW_NAME" "/home/$USER/scripts/scheduler_handler.sh" C-m
 	fi
 fi
