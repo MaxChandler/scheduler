@@ -10,9 +10,10 @@ function is_running {
 	if (( $(pgrep -c -u $USER -f scheduler_handler.sh) > 1 )) ; then
 		log 'process already running - not doing anything'
 		# kill_others
+	else
+		log 'starting : no instance found'
+		setup_directories
 	fi
-	log 'starting : no instance found'
-	setup_directories
 }
 
 function main {
