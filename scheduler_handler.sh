@@ -8,8 +8,8 @@ declare -r TMUX_WINDOW_NAME='scheduler'
 
 function is_running {
 	if (( $(pgrep -c -u $USER -f scheduler_handler.sh) > 1 )) ; then
-		log 'process already running'
-		kill_others
+		log 'process already running - not doing anything'
+		# kill_others
 	fi
 	log 'starting : no instance found'
 	setup_directories
