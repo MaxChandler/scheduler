@@ -1,9 +1,7 @@
 #!/bin/bash
 declare -r TMUX_WINDOW_NAME='handler'
 
-if (( $(pgrep -c -u $USER -f scheduler_handler.sh) > 1 )) ; then
-	:
-else
+if [ $(pgrep -c -u $USER -f scheduler_handler.sh) == 0 ] ; then
 	cd ~/scripts
 	if ! tmux ls > /dev/null 2>&1 ; then
 		# start new tmux session
