@@ -176,7 +176,7 @@ function relax {
         log 'More than one user'
         if command -v >/dev/null ; then
             log 'Lun installed'
-            if $(lun | grep -q 'bsc') || $(lun | grep -q 'masters') || $(lun | grep -q 'staff'); then
+            if $(lun | grep -q -i 'bsc') || $(lun | grep -q -i 'masters') || $(lun | grep -q -i 'staff'); then
 				log 'relaxing'
 				return 0
             fi
