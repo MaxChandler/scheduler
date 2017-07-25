@@ -10,6 +10,8 @@ declare -a RESTRICTED_MACHINES=( "lapis" "aluminium" "argon" "arsenic" "berylliu
 declare -r PROCESS_COMMAND="matlab -nodisplay -r 'add_path_matlab; j = Job(); j.get_and_run(); exit;'"
 declare -r TMUX_WINDOW_NAME='scheduler'
 declare -r RAM_LIMIT=90
+declare -r UPPER_RAM_LIMIT=98
+
 
 function is_running {
 	if (( $(pgrep -c -u $USER -f scheduler.sh) > 1 )) ; then
@@ -213,6 +215,10 @@ function main {
 				kill_processes
 			fi
 		else
+			if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $UPPER_RAM_LIMIT ]] ; then
+				log "memory usage is higher than $UPPER_RAM_LIMIT percent, killng process"
+				kill_processes
+			fi
 			log "Unrestricted machine : attempting to start process"
 		fi
 		sleep $(( ( RANDOM % 60 )  + 1 ))
