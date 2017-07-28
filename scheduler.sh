@@ -107,12 +107,12 @@ function update_repository {
 }
 
 function pause_matlab {
-	kill -SIGSTOP $(pgrep -u $USER MATLAB)
+	kill -s SIGSTOP $(pgrep -u $USER MATLAB)
 	log 'matlab paused'
 }
 
 function resume_matlab {
-	kill -SIGCONT $(pgrep -u $USER MATLAB)
+	kill -s SIGCONT $(pgrep -u $USER MATLAB)
 	log 'matlab resumed'
 }
 
