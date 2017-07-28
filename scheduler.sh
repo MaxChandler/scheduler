@@ -176,7 +176,7 @@ function relax {
     num_users=$( who | sort --key=1,1 --unique | wc --lines )
     if (( $num_users > 1 )); then
         log 'More than one user'
-        if command -v >/dev/null ; then
+        if lun -v >/dev/null ; then
             log 'Lun installed'
             if $(lun | grep -q -i 'bsc') || $(lun | grep -q -i 'masters') || $(lun | grep -q -i 'staff'); then
 				log 'relaxing'
