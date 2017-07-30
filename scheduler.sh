@@ -176,16 +176,16 @@ function relax {
     num_users=$( who | sort --key=1,1 --unique | wc --lines )
     if (( $num_users > 1 )); then
         log 'More than one user'
-        if lun -v >/dev/null ; then
-            log 'Lun installed'
-            if $(lun | grep -q -i 'bsc') || $(lun | grep -q -i 'masters') || $(lun | grep -q -i 'staff'); then
-				log 'relaxing'
-				return 0
-            fi
-		else
+  #       if lun -v >/dev/null ; then
+  #           log 'Lun installed'
+  #           if $(lun | grep -q -i 'bsc') || $(lun | grep -q -i 'masters') || $(lun | grep -q -i 'staff'); then
+		# 		log 'relaxing'
+		# 		return 0
+  #           fi
+		# else
 			log 'relaxing'
 		    return 0
-		fi
+		# fi
     fi
     log 'no need to relax'
     return 1
@@ -199,17 +199,17 @@ function main {
 		start_processes
 		if is_restricted_machine ; then
 			log "Running on a machine that is restricted in computing time & resources"
-			local H=$(date +%H)
-			if (( 8 <= 10#$H && 10#$H < 18 )); then 
-				log 'between 8AM and 6PM'
-				if relax ; then
-					pause_matlab
-				else
-					resume_matlab
-				fi
+			# local H=$(date +%H)
+			# if (( 8 <= 10#$H && 10#$H < 18 )); then 
+			# 	log 'between 8AM and 6PM'
+			if relax ; then
+				pause_matlab
 			else
-				log 'between 8AM and 6PM'
+				resume_matlab
 			fi
+			# else
+			# 	log 'between 8AM and 6PM'
+			# fi
 			if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $RAM_LIMIT ]] ; then
 				log "memory usage is higher than $RAM_LIMIT percent, killng process"
 				kill_processes
