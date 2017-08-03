@@ -228,7 +228,7 @@ function main {
 				log "Unrestricted machine : attempting to start process"
 			fi
 		fi
-		sleep $(( ( RANDOM % 60 )  + 1 ))
+		sleep $(( ( RANDOM % 15 )  + 1 ))
 		has_finished
 	done
 }
