@@ -164,12 +164,13 @@ function has_finished {
 }
 
 function is_restricted_machine {
-	for machine in ${RESTRICTED_MACHINES[@]} ; do
-		if [[ "$machine" == "$HOSTNAME" ]]; then
-			return 0
-		fi
-	done
-	return 1
+	return 0
+	# for machine in ${RESTRICTED_MACHINES[@]} ; do
+	# 	if [[ "$machine" == "$HOSTNAME" ]]; then
+	# 		return 0
+	# 	fi
+	# done
+	# return 1
 }
 
 function relax {
