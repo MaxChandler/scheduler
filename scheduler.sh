@@ -197,30 +197,36 @@ function main {
 	clear_log
 	check
 	while true ; do
-		start_processes
-		if is_restricted_machine ; then
-			log "Running on a machine that is restricted in computing time & resources"
-			# local H=$(date +%H)
-			# if (( 8 <= 10#$H && 10#$H < 18 )); then 
-			# 	log 'between 8AM and 6PM'
-			if relax ; then
-				pause_matlab
-			else
-				resume_matlab
-			fi
-			# else
-			# 	log 'between 8AM and 6PM'
-			# fi
-			if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $RAM_LIMIT ]] ; then
-				log "memory usage is higher than $RAM_LIMIT percent, killng process"
-				kill_processes
-			fi
+		if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $RAM_LIMIT ]] ; then
+			log "memory usage is higher than $RAM_LIMIT percent, killng process"
+			kill_processes
+			sleep $(( ( RANDOM % 3000 )  + 1 ))
 		else
-			if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $UPPER_RAM_LIMIT ]] ; then
-				log "memory usage is higher than $UPPER_RAM_LIMIT percent, killng process"
-				kill_processes
+			start_processes
+			if is_restricted_machine ; then
+				log "Running on a machine that is restricted in computing time & resources"
+				# local H=$(date +%H)
+				# if (( 8 <= 10#$H && 10#$H < 18 )); then 
+				# 	log 'between 8AM and 6PM'
+				if relax ; then
+					pause_matlab
+				else
+					resume_matlab
+				fi
+				# else
+				# 	log 'between 8AM and 6PM'
+				# fi
+				if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $RAM_LIMIT ]] ; then
+					log "memory usage is higher than $RAM_LIMIT percent, killng process"
+					kill_processes
+				fi
+			else
+				if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $UPPER_RAM_LIMIT ]] ; then
+					log "memory usage is higher than $UPPER_RAM_LIMIT percent, killng process"
+					kill_processes
+				fi
+				log "Unrestricted machine : attempting to start process"
 			fi
-			log "Unrestricted machine : attempting to start process"
 		fi
 		sleep $(( ( RANDOM % 60 )  + 1 ))
 		has_finished
