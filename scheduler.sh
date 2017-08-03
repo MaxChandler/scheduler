@@ -200,7 +200,7 @@ function main {
 		if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $RAM_LIMIT ]] ; then
 			log "memory usage is higher than $RAM_LIMIT percent, killng process"
 			kill_processes
-			sleep $(( ( RANDOM % 3000 )  + 1 ))
+			sleep 45m
 		else
 			start_processes
 			if is_restricted_machine ; then
