@@ -9,7 +9,7 @@ declare -r ERRLOG=$ROOT_DIR/scheduler.error_log
 declare -a RESTRICTED_MACHINES=( "lapis" "aluminium" "argon" "arsenic" "beryllium" "boron" "bromine" "calcium" "carbon" "chlorine" "chromium" "cobalt" "copper" "fluorine" "gallium" "germanium" "helium" "hydrogen" "iron" "krypton" "lithium" "magnesium" "manganese" "neon" "nickel" "niobium" "nitrogen" "oxygen" "phosphorus" "potassium" "rubidium" "scandium" "selenium" "silicon" "sodium" "strontium" "sulfur" "titanium" "vanadium" "yttrium" "zirconium" "zinc" )
 declare -r PROCESS_COMMAND="matlab -nodisplay -r 'add_path_matlab; j = Job(); j.get_and_run(); exit;'"
 declare -r TMUX_WINDOW_NAME='scheduler'
-declare -r RAM_LIMIT=75
+declare -r RAM_LIMIT=90
 declare -r UPPER_RAM_LIMIT=98
 
 
