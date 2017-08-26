@@ -210,21 +210,22 @@ function main {
 				# 	log 'between 8AM and 6PM'
 				if relax ; then
 					pause_matlab
+					# if memory usage is high when more than one user is on the machine, kill the process
+					if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $RAM_LIMIT ]] ; then
+						log "memory usage is higher than $RAM_LIMIT percent, killng process"
+						kill_processes
+					fi
 				else
 					resume_matlab
 				fi
 				# else
 				# 	log 'between 8AM and 6PM'
 				# fi
-				if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $RAM_LIMIT ]] ; then
-					log "memory usage is higher than $RAM_LIMIT percent, killng process"
-					kill_processes
-				fi
 			else
-				if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $UPPER_RAM_LIMIT ]] ; then
-					log "memory usage is higher than $UPPER_RAM_LIMIT percent, killng process"
-					kill_processes
-				fi
+				# if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $UPPER_RAM_LIMIT ]] ; then
+				# 	log "memory usage is higher than $UPPER_RAM_LIMIT percent, killng process"
+				# 	kill_processes
+				# fi
 				log "Unrestricted machine : attempting to start process"
 			fi
 		fi
