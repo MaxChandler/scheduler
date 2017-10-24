@@ -94,7 +94,7 @@ function setup_matlab_path {
 	if echo $PATH | grep -q $MATLAB_ROOT; then
         log "Matlab root already in PATH";
 	else
-        PATH=$PATH:$MATLAB_ROOT;
+        export PATH=$PATH:$MATLAB_ROOT >> /home/$USER/.profile;
         log "Matlab root added to PATH";
 	fi
 }
