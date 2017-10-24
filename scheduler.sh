@@ -61,7 +61,7 @@ function check {
 
 	# some machines do not have matlab in the /usr/local/bin path so we need to add it to our $PATH
 
-	setup_matlab_path
+	# setup_matlab_path
 
 	# make sure all the programs we need are installed!
 	if ! type tmux >/dev/null 2>/dev/null; then
@@ -88,16 +88,16 @@ function setup_directories {
 	log "setup directories : $MRS_LOCAL_DIR & $ROOT_DIR"
 }
 
-function setup_matlab_path {
-	MATLAB_ROOT=$(locate /bin/matlab | grep matlab$);
-	MATLAB_ROOT=${MATLAB_ROOT%matlab};
-	if echo $PATH | grep -q $MATLAB_ROOT; then
-        log "Matlab root already in PATH";
-	else
-        export PATH=$PATH:$MATLAB_ROOT >> /home/$USER/.profile;
-        log "Matlab root added to PATH";
-	fi
-}
+# function setup_matlab_path {
+# 	MATLAB_ROOT=$(locate /bin/matlab | grep matlab$);
+# 	MATLAB_ROOT=${MATLAB_ROOT%matlab};
+# 	if echo $PATH | grep -q $MATLAB_ROOT; then
+#         log "Matlab root already in PATH";
+# 	else
+#         export PATH=$PATH:$MATLAB_ROOT >> /home/$USER/.profile;
+#         log "Matlab root added to PATH";
+# 	fi
+# }
 
 function update_repository {
 	log "updating code repository : $CONTROL_DIR"
