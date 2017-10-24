@@ -100,9 +100,9 @@ function setup_directories {
 # }
 
 function update_repository {
-	log "updating code repository : $CONTROL_DIR"
 	if ! tmux list-windows | grep "$TMUX_WINDOW_NAME">/dev/null; then
 		if ! pgrep -x "rsync" -u $USER > /dev/null; then
+			log "updating code repository : $CONTROL_DIR"
 			if ping -c 1 -w 3 tourmalet.cs.cf.ac.uk &>/dev/null ; then
 				log "rsyncing with : tourmalet"
 				if is_restricted_machine ; then 
@@ -126,18 +126,21 @@ function update_repository {
 		fi
 		log 'code updated successfully'
 	else
-		log "\"$TMUX_WINDOW_NAME\" is open : not updating code in $$CONTROL_DIR"
+		log "\"$TMUX_WINDOW_NAME\" tmux window is open : not updating code"
 	fi
 }
 
 function pause_matlab {
-	kill -s SIGSTOP $(pgrep -u $USER MATLAB)
+	kill -s STOP $(pgrep -u $USER MATLAB)
 	log 'matlab paused'
 }
 
 function resume_matlab {
-	kill -s SIGCONT $(pgrep -u $USER MATLAB)
-	log 'matlab resumed'
+	PID=$(pgrep -u $USER MATLAB)
+	if [ "$(ps -o state= -p $PID)" = T ] ; then
+		kill -CONT $PID
+		log 'matlab resumed'
+	fi
 }
 
 function kill_processes {
@@ -174,7 +177,7 @@ function start_processes {
 			tmux send-keys -t "$TMUX_WINDOW_NAME" "cd $CONTROL_DIR/QControl/; $PROCESS_COMMAND" C-m
 		fi
 	else
-		log 'tmux scheduler window is open : not starting another job! - check if window has paused'
+		log "\"$TMUX_WINDOW_NAME\" tmux window is open : not starting another job"
 	fi
 }
 
@@ -253,7 +256,7 @@ function main {
 				log "Unrestricted machine : attempting to start process"
 			fi
 		fi
-		sleep $(( ( RANDOM % 15 )  + 1 ))
+		sleep $(( ( RANDOM % 15 )  + 10 ))
 		has_finished
 	done
 }
