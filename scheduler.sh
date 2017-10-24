@@ -12,7 +12,6 @@ declare -r TMUX_WINDOW_NAME='scheduler'
 declare -r RAM_LIMIT=90
 declare -r UPPER_RAM_LIMIT=98
 
-
 function is_running {
 	if (( $(pgrep -c -u $USER -f scheduler.sh) > 1 )) ; then
 		log 'already running'
@@ -60,6 +59,10 @@ function check {
 
 	# assumed that if you reach here, you can access the servers
 
+	# some machines do not have matlab in the /usr/local/bin path so we need to add it to our $PATH
+
+	setup_matlab_path
+
 	# make sure all the programs we need are installed!
 	if ! type tmux >/dev/null 2>/dev/null; then
   		error_log "tmux is not installed"
@@ -81,7 +84,19 @@ function check {
 function setup_directories {
 	mkdir -p $MRS_LOCAL_DIR
 	chmod 700 $ROOT_DIR
+	mkdir -p $CONTROL_DIR
 	log "setup directories : $MRS_LOCAL_DIR & $ROOT_DIR"
+}
+
+function setup_matlab_path {
+	MATLAB_ROOT=$(locate /bin/matlab | grep matlab$);
+	MATLAB_ROOT=${MATLAB_ROOT%matlab};
+	if echo $PATH | grep -q $MATLAB_ROOT; then
+        log "Matlab root already in PATH";
+	else
+        PATH=$PATH:$MATLAB_ROOT;
+        log "Matlab root added to PATH";
+	fi
 }
 
 function update_repository {
@@ -99,6 +114,15 @@ function update_repository {
 			else
 				error_log 'Cannot contact tourmalet to update repository'
 			fi
+			# if ping -c 1 -w 3 qyber.black &>/dev/null ; then
+			# 	if git rev-parse $CONTROL_DIR > /dev/null 2>&1; then
+			# 		git -C $CONTROL_DIR pull
+			# 	else
+			# 		git -C $CONTROL_DIR clone git@qyber.black:MRIS/control.git
+			# 	fi
+			# else
+			# 	error_log 'Cannot contact qyber to update repository'
+			# fi
 		fi
 		log 'code updated successfully'
 	else
@@ -107,12 +131,12 @@ function update_repository {
 }
 
 function pause_matlab {
-	kill -s SIGSTOP $(pgrep -u $USER  MATLAB)
+	kill -s SIGSTOP $(pgrep -u $USER MATLAB)
 	log 'matlab paused'
 }
 
 function resume_matlab {
-	kill -s SIGCONT $(pgrep -u $USER  MATLAB)
+	kill -s SIGCONT $(pgrep -u $USER MATLAB)
 	log 'matlab resumed'
 }
 
@@ -188,7 +212,7 @@ function relax {
 		    return 0
 		# fi
     fi
-    log 'no need to relax'
+    # log 'no need to relax'
     return 1
 }
 
@@ -204,7 +228,7 @@ function main {
 		else
 			start_processes
 			if is_restricted_machine ; then
-				log "Running on a machine that is restricted in computing time & resources"
+				# log "Running on a machine that is restricted in computing time & resources"
 				# local H=$(date +%H)
 				# if (( 8 <= 10#$H && 10#$H < 18 )); then 
 				# 	log 'between 8AM and 6PM'

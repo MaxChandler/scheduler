@@ -93,7 +93,7 @@ function check {
 function clear_logs {
 	rm -f $LOGFILE
 	rm -f $ERRLOG
-	log "cleared old log files"
+	log "cleared old log and error log"
 }
 
 function setup_directories {
@@ -105,9 +105,9 @@ function update {
 	if ping -c 1 tourmalet.cs.cf.ac.uk &>/dev/null ; then
 		scp max@tourmalet.cs.cf.ac.uk:~/scheduler/scheduler.sh $SCRIPT_DIR >/dev/null
 	else
-		error_log 'cannot connect to tourmalet'
+		error_log 'cannot connect to tourmalet to update scheduler.sh'
 	fi
-	log 'Updated scheduler.sh'
+	log 'Updated scheduler.sh from tourmalet'
 }
 
 function clean_up_exit {
