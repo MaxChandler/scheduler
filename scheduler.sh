@@ -131,16 +131,19 @@ function update_repository {
 }
 
 function pause_matlab {
-	kill -s STOP $(pgrep -u $USER MATLAB)
+	kill -s SIGSTOP $(pgrep -u $USER MATLAB)
 	log 'matlab paused'
 }
 
 function resume_matlab {
-	PID=$(pgrep -u $USER MATLAB)
-	if [ "$(ps -o state= -p $PID)" = T ] ; then
-		kill -CONT $PID
-		log 'matlab resumed'
-	fi
+	PIDS=$(pgrep -u $USER MATLAB)
+	for PID in $PIDS; do
+		if [ "$(ps -o state= -p $PID)" = T ] ; then
+			kill -SIGCONT $PID
+			log 'matlab resumed'
+		fi
+	done
+	
 }
 
 function kill_processes {
