@@ -90,11 +90,11 @@ function setup_directories {
 }
 
 function email_stop {
+	# switch possible mail clients : check return codes
 	# there is no universal way to make this work, so instead of attaching the files : we just make them the body of the email..
 	mail -s "Process stopped on machine $HOSTNAME : Scheduler log" chandlerm1@cs.cf.ac.uk < $LOGFILE
 	mail -s "Process stopped on machine $HOSTNAME : Scheduler error log" chandlerm1@cs.cf.ac.uk < $ERRLOG
-	mail -s "Process stopped on machine $HOSTNAME : Matlab terminal output " chandlerm1@cs.cf.ac.uk < $MATLAB_OUT
-	# TO-DO : check if any of the matlab crash dumps exist, if so - email them to me
+	mail -s "Process stopped on machine $HOSTNAME : Matlab log " chandlerm1@cs.cf.ac.uk < $MATLAB_OUT # as we've swapped to the internal matlab logging, it will append all of the info to this
 }
 
 # function setup_matlab_path {
