@@ -44,25 +44,11 @@ function warning_log {
 }
 
 function check {
-	# consistency checks
-	# if there are pre-existing errors, then stop running
+	# consistency checks : if there are pre-existing errors, then stop running
 	if [ -f $ERRLOG ]; then
 		error_log 'Errors found, exiting'
 		exit
 	fi
-
-	# # check to make sure we can access the servers we can connect too
-	# ssh -q $MRS_REMOTE_HOST exit
-	# if (( $? != 0 )) ; then
-	# 	error_log 'cannot open ssh connection to tourmalet, but can ping : setup keys'
-	# 	exit
-	# fi
-
-	# assumed that if you reach here, you can access the servers
-
-	# some machines do not have matlab in the /usr/local/bin path so we need to add it to our $PATH
-
-	# setup_matlab_path
 
 	# make sure all the programs we need are installed!
 	if ! type tmux >/dev/null 2>/dev/null; then
@@ -74,10 +60,6 @@ function check {
 	elif ! type rsync >/dev/null 2>/dev/null; then
   		error_log "rsync is not installed"
   		exit
-  	elif ! type ffmpeg >/dev/null 2>/dev/null; then
-  		warning_log "ffpmeg is not installed"
-  	elif ! type povray >/dev/null 2>/dev/null; then
-  		warning_log "povray is not installed"
 	fi
 	setup_directories
 }
@@ -97,17 +79,6 @@ function email_stop {
 	mail -s "Process stopped on machine $HOSTNAME : Matlab log " chandlerm1@cs.cf.ac.uk < $MATLAB_OUT # as we've swapped to the internal matlab logging, it will append all of the info to this
 }
 
-# function setup_matlab_path {
-# 	MATLAB_ROOT=$(locate /bin/matlab | grep matlab$);
-# 	MATLAB_ROOT=${MATLAB_ROOT%matlab};
-# 	if echo $PATH | grep -q $MATLAB_ROOT; then
-#         log "Matlab root already in PATH";
-# 	else
-#         export PATH=$PATH:$MATLAB_ROOT >> /home/$USER/.profile;
-#         log "Matlab root added to PATH";
-# 	fi
-# }
-
 function update_repository {
 	if ! tmux list-windows | grep "$TMUX_WINDOW_NAME">/dev/null; then
 		if ! pgrep -x "rsync" -u $USER > /dev/null; then
@@ -123,15 +94,6 @@ function update_repository {
 			else
 				error_log 'Cannot contact tourmalet to update repository'
 			fi
-			# if ping -c 1 -w 3 qyber.black &>/dev/null ; then
-			# 	if git rev-parse $CONTROL_DIR > /dev/null 2>&1; then
-			# 		git -C $CONTROL_DIR pull
-			# 	else
-			# 		git -C $CONTROL_DIR clone git@qyber.black:MRIS/control.git
-			# 	fi
-			# else
-			# 	error_log 'Cannot contact qyber to update repository'
-			# fi
 		fi
 		log 'code updated successfully'
 	else
@@ -205,30 +167,14 @@ function has_finished {
 
 function is_restricted_machine {
 	return 0
-	# for machine in ${RESTRICTED_MACHINES[@]} ; do
-	# 	if [[ "$machine" == "$HOSTNAME" ]]; then
-	# 		return 0
-	# 	fi
-	# done
-	# return 1
 }
 
 function relax {
     num_users=$( who | sort --key=1,1 --unique | wc --lines )
     if (( $num_users > 1 )); then
-        log 'More than one user'
-  #       if lun -v >/dev/null ; then
-  #           log 'Lun installed'
-  #           if $(lun | grep -q -i 'bsc') || $(lun | grep -q -i 'masters') || $(lun | grep -q -i 'staff'); then
-		# 		log 'relaxing'
-		# 		return 0
-  #           fi
-		# else
-			log 'relaxing'
-		    return 0
-		# fi
+        log 'More than one user : relaxing processes'
+		return 0
     fi
-    # log 'no need to relax'
     return 1
 }
 
@@ -243,30 +189,15 @@ function main {
 			sleep 45m
 		else
 			start_processes
-			if is_restricted_machine ; then
-				# log "Running on a machine that is restricted in computing time & resources"
-				# local H=$(date +%H)
-				# if (( 8 <= 10#$H && 10#$H < 18 )); then 
-				# 	log 'between 8AM and 6PM'
-				if relax ; then
-					pause_matlab
-					# if memory usage is high when more than one user is on the machine, kill the process
-					if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $RAM_LIMIT ]] ; then
-						log "memory usage is higher than $RAM_LIMIT percent, killng process"
-						kill_processes
-					fi
-				else
-					resume_matlab
+			if relax ; then
+				pause_matlab
+				# if memory usage is high when more than one user is on the machine, kill the process
+				if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $RAM_LIMIT ]] ; then
+					log "memory usage is higher than $RAM_LIMIT percent, killng process"
+					kill_processes
 				fi
-				# else
-				# 	log 'between 8AM and 6PM'
-				# fi
 			else
-				# if [[ $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $UPPER_RAM_LIMIT ]] ; then
-				# 	log "memory usage is higher than $UPPER_RAM_LIMIT percent, killng process"
-				# 	kill_processes
-				# fi
-				log "Unrestricted machine : attempting to start process"
+				resume_matlab
 			fi
 		fi
 		sleep $(( ( RANDOM % 15 )  + 10 ))
