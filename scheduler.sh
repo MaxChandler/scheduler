@@ -4,11 +4,11 @@ declare -r MRS_LOCAL_DIR=/tmp/$USER/MRS_Data/
 declare -r MRS_REMOTE_HOST=max@tourmalet.cs.cf.ac.uk
 declare -r MRS_REMOTE_DIR=/home/max/MRS_Data/
 declare -r CONTROL_DIR=/tmp/$USER/control/
-declare -r LOGFILE=$ROOT_DIR/scheduler.log
-declare -r ERRLOG=$ROOT_DIR/scheduler.error_log
-declare -r MATLAB_OUT=$ROOT_DIR/matlab.output
+declare -r LOGFILE=${ROOT_DIR}scheduler.log
+declare -r ERRLOG=${ROOT_DIR}scheduler.error_log
+declare -r MATLAB_OUT=${ROOT_DIR}matlab.output
 declare -a RESTRICTED_MACHINES=( "lapis" "aluminium" "argon" "arsenic" "beryllium" "boron" "bromine" "calcium" "carbon" "chlorine" "chromium" "cobalt" "copper" "fluorine" "gallium" "germanium" "helium" "hydrogen" "iron" "krypton" "lithium" "magnesium" "manganese" "neon" "nickel" "niobium" "nitrogen" "oxygen" "phosphorus" "potassium" "rubidium" "scandium" "selenium" "silicon" "sodium" "strontium" "sulfur" "titanium" "vanadium" "yttrium" "zirconium" "zinc" )
-declare -r PROCESS_COMMAND="matlab -nodisplay -r 'add_path_matlab; j = Job(); j.get_and_run(); exit;'"
+declare -r PROCESS_COMMAND="matlab -nodisplay -nodesktop -logfile $MATLAB_OUT -r 'setup_env(); j = Job(); j.get_and_run(); exit;'"
 declare -r TMUX_WINDOW_NAME='scheduler'
 declare -r RAM_LIMIT=90
 declare -r UPPER_RAM_LIMIT=98
@@ -94,6 +94,7 @@ function email_stop {
 	mail -s "Process stopped on machine $HOSTNAME : Scheduler log" chandlerm1@cs.cf.ac.uk < $LOGFILE
 	mail -s "Process stopped on machine $HOSTNAME : Scheduler error log" chandlerm1@cs.cf.ac.uk < $ERRLOG
 	mail -s "Process stopped on machine $HOSTNAME : Matlab terminal output " chandlerm1@cs.cf.ac.uk < $MATLAB_OUT
+	# TO-DO : check if any of the matlab crash dumps exist, if so - email them to me
 }
 
 # function setup_matlab_path {
@@ -183,10 +184,10 @@ function start_processes {
 		log 'MATLAB & tmux now running : starting job'
 		if is_restricted_machine ; then
 			log "Restricted machine : running job with nice -n 19 & ionice -c 2 -n 7 : $PROCESS_COMMAND"
-			tmux send-keys -t "$TMUX_WINDOW_NAME" "cd $CONTROL_DIR/QControl/; nice -n 19 ionice -c2 -n7 $PROCESS_COMMAND |& tee $MATLAB_OUT" C-m
+			tmux send-keys -t "$TMUX_WINDOW_NAME" "cd $CONTROL_DIR/QControl/; nice -n 19 ionice -c2 -n7 $PROCESS_COMMAND" C-m
 		else
 			log "Unrestricted machine : running job : $PROCESS_COMMAND"
-			tmux send-keys -t "$TMUX_WINDOW_NAME" "cd $CONTROL_DIR/QControl/; $PROCESS_COMMAND |& tee $MATLAB_OUT" C-m
+			tmux send-keys -t "$TMUX_WINDOW_NAME" "cd $CONTROL_DIR/QControl/; $PROCESS_COMMAND" C-m
 		fi
 	else
 		log "\"$TMUX_WINDOW_NAME\" tmux window is open : not starting another job"
