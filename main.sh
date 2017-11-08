@@ -27,12 +27,16 @@ lock() {
 }
 
 self_update() {
+
+    UPSTREAM=${1:-'@{u}'}
+    LOCAL=$(git rev-parse @)
+    REMOTE=$(git rev-parse "$UPSTREAM")
+    BASE=$(git merge-base @ "$UPSTREAM")
+
     cd $SCRIPTPATH
     git fetch
 
-    if output=$(git status --untracked-files=no --porcelain) && [ -z "$output" ]; then 
-        echo "Already the latest version."
-    else
+    if [ $LOCAL = $BASE ]; then 
         echo "Found a new version of me, updating myself..."
         git pull --force
         git checkout 
@@ -41,6 +45,10 @@ self_update() {
         exec "$SCRIPTNAME"
         # Now exit this old instance
         exit 1
+    elif [ $LOCAL = $REMOTE ]; then
+        echo "Already the latest version."
+    else 
+        echo "git has diverged, you may want to reset"
     fi
 }
 
