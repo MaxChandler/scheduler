@@ -235,7 +235,7 @@ update_code () {
 		log "force pulling from qyber.black"
 		ssh-agent bash -c "ssh-add /home/${USER}/.ssh/id_rsa &>/dev/null; git -C $CONTROL_DIR pull --force &>/dev/null;"
 		if (( $? != 0 )); then
-			error_log $?
+			error_log "Error updating code from git repository";
 		fi
 	fi 
 }
