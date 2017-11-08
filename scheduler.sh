@@ -104,6 +104,7 @@ spawn_process () {
 		while (( "$n_procs" < "$MAX_NUM_PROCS" )) ; do
 			log "space for more processes : $n_procs processes running on $n_cores cores: spawning one more"
 			start_process
+			sleep 5s
 			num_processes
 		done
 	fi
