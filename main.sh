@@ -14,7 +14,8 @@ lock() {
     local fd=${2:-$LOCK_FD}
     local lock_file=$LOCKFILE_DIR/$prefix.lock
 
-    mkdir -p $LOCKFILE_DIR
+    mkdir -p $LOCKFILE_DIR &> /dev/null
+    chmod 700 $ROOT_DIR
 
     # create lock file
     eval "exec $fd>$lock_file"
