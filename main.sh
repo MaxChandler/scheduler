@@ -27,7 +27,7 @@ self_update() {
     cd $SCRIPTPATH
     git fetch
 
-    if [ -n $(git status --porcelain) ] ; then 
+    if [[ -z $(git status --porcelain) ]] ; then 
         echo "Found a new version of me, updating myself..."
         git pull --force
         git checkout 
