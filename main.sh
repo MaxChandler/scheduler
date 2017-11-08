@@ -29,7 +29,7 @@ self_update() {
     cd $SCRIPTPATH
     git fetch
 
-    [ -n $(git diff --name-only origin/$BRANCH | grep $SCRIPTNAME) ] && {
+    if [ -n $(git diff --name-only origin/$BRANCH | grep $SCRIPTNAME) ] ; then 
         echo "Found a new version of me, updating myself..."
         git pull --force
         git checkout $BRANCH
@@ -39,7 +39,7 @@ self_update() {
 
         # Now exit this old instance
         exit 1
-    }
+    fi
     echo "Already the latest version."
 }
 
