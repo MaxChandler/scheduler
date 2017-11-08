@@ -27,7 +27,9 @@ self_update() {
     cd $SCRIPTPATH
     git fetch
 
-    if [[ -z $(git status --porcelain) ]] ; then 
+    if output=$(git status --untracked-files=no --porcelain) && [ -z "$output" ]; then 
+        echo "Already the latest version."
+    else
         echo "Found a new version of me, updating myself..."
         git pull --force
         git checkout 
@@ -37,7 +39,6 @@ self_update() {
         # Now exit this old instance
         exit 1
     fi
-    echo "Already the latest version."
 }
 
 main () {
