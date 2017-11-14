@@ -10,7 +10,7 @@ declare -r RAM_LIMIT=85
 declare PAUSED=0
 declare WINDOW_COUNT=0
 declare MAX_NUM_PROCS=0
-declare IDLE_CPU_LIM=5
+declare IDLE_CPU_LIM=20
 
 main () {
 	is_running

@@ -31,7 +31,7 @@ self_update() {
     cd $SCRIPTPATH
 
     changed=0
-    git remote update && git status -uno | grep -q 'Your branch is behind' && changed=1
+    git -q remote update && git status -uno | grep -q 'Your branch is behind' && changed=1
 
     if [ $changed = 1 ]; then 
         echo "Found a new version of me, updating myself..."
