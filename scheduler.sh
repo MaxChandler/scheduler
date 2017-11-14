@@ -10,7 +10,7 @@ declare -r RAM_LIMIT=85
 declare PAUSED=0
 declare WINDOW_COUNT=0
 declare MAX_NUM_PROCS=0
-declare IDLE_CPU_LIM=20
+declare IDLE_CPU_LIM=2
 
 main () {
 	is_running
@@ -119,7 +119,7 @@ check_processes () {
 			child_pid=$(pgrep -P $pane_pid)
 			if ! [ -z "$child_pid" ]; then
 				# log "found a child process : checking if it is OK"
-				cpu_usage=$(top -bn2 -p $child_pid | grep "Cpu(s)" | tail -n 1 | awk '{print int($2 + $4 + 0.5)}')
+				cpu_usage=$(top -bn2 -d10 -p $child_pid | grep "Cpu(s)" | tail -n 1 | awk '{print int($2 + $4 + 0.5)}')
 				if (( "$cpu_usage" < "$IDLE_CPU_LIM" )); then
 					log "looks like process has stalled : cpu usage is less than $IDLE_CPU_LIM% : $cpu_usage"
 					log "killing tmux-window $( tmux list-windows -t $TMUX_SESSION_NAME -F "#{window_name} #{pane_pid}" | grep $pane_pid | awk '{print $1'})"
