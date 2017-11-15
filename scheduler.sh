@@ -38,7 +38,7 @@ main () {
 			sleep 25s # allow the processes to spawn back up after being resumed before being killed instantly.
 		fi
 		# check to see if any processes have stalled
-		# check_processes
+		check_processes
 	done
 }
 
@@ -120,14 +120,14 @@ check_processes () {
 			if ! [ -z "$child_pid" ]; then
 				# log "found a child process : checking if it is OK"
 				cpu_usage=$(top -bn2 -d10 -p $child_pid | grep "Cpu(s)" | tail -n 1 | awk '{print int($2 + $4 + 0.5)}')
-				if (( "$cpu_usage" < "$IDLE_CPU_LIM" )); then
-					log "looks like process has stalled : cpu usage is less than $IDLE_CPU_LIM% : $cpu_usage"
-					log "killing tmux-window $( tmux list-windows -t $TMUX_SESSION_NAME -F "#{window_name} #{pane_pid}" | grep $pane_pid | awk '{print $1'})"
-					tmux kill-window -t $( tmux list-windows -t $TMUX_SESSION_NAME -F "#{window_name} #{pane_pid}" | grep $pane_pid | awk '{print $1'})
-					email_stop
+				# if (( "$cpu_usage" < "$IDLE_CPU_LIM" )); then
+				# 	log "looks like process has stalled : cpu usage is less than $IDLE_CPU_LIM% : $cpu_usage"
+				# 	log "killing tmux-window $( tmux list-windows -t $TMUX_SESSION_NAME -F "#{window_name} #{pane_pid}" | grep $pane_pid | awk '{print $1'})"
+				# 	tmux kill-window -t $( tmux list-windows -t $TMUX_SESSION_NAME -F "#{window_name} #{pane_pid}" | grep $pane_pid | awk '{print $1'})
+				# 	email_stop
 				# else
-					# log "looks ok - leave it as is : cpu usage is $cpu_usage"
-				fi
+				#	log "looks ok - leave it as is : cpu usage is $cpu_usage"
+				# fi
 			else
 				log "tmux pane has no child process associated with it! kill it!"	
 				tmux kill-window -t $( tmux list-windows -t $TMUX_SESSION_NAME -F "#{window_name} #{pane_pid}" | grep $pane_pid | awk '{print $1'})
