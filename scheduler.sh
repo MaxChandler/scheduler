@@ -38,7 +38,7 @@ main () {
 			sleep 25s # allow the processes to spawn back up after being resumed before being killed instantly.
 		fi
 		# check to see if any processes have stalled
-		check_processes
+		# check_processes
 	done
 }
 
