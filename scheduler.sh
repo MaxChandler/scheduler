@@ -246,7 +246,7 @@ start_process () {
 	log "starting new tmux window : runner_${WINDOW_COUNT}"
 	tmux new-window -d -t $TMUX_SESSION_NAME -n "runner_${WINDOW_COUNT}"
 	# get new tmux window name and attach it to the logs
-	tmux send-keys -t "runner_${WINDOW_COUNT}" "cd $CONTROL_DIR/QControl/; matlab -nodisplay -nodesktop -logfile ${MATLAB_OUT}_${WINDOW_COUNT} -r 'setup_env(false); j = Job(); j.get_and_run(); exit;' "  C-m
+	tmux send-keys -t "runner_${WINDOW_COUNT}" "cd $CONTROL_DIR/QControl/; matlab -nodisplay -nodesktop -logfile ${MATLAB_OUT}_${WINDOW_COUNT} -r 'setup_env(); j = Job(); j.get_and_run(); exit;' "  C-m
 	# update theh window count to give each window a unique ID 
 	((WINDOW_COUNT++))
 }
