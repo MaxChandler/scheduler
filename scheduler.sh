@@ -7,6 +7,7 @@ declare -r MATLAB_OUT=${ROOT_DIR}matlab.output
 declare -r TMUX_SESSION_NAME='scheduler'
 declare -r RAM_LIMIT=85
 
+declare MATLAB_COMMAND='try; setup_env(); j=Job(); j.get_and_run(); exit; catch err; exit; end;'
 declare PAUSED=0
 declare WINDOW_COUNT=0
 declare MAX_NUM_PROCS=0
@@ -246,7 +247,7 @@ start_process () {
 	log "starting new tmux window : runner_${WINDOW_COUNT}"
 	tmux new-window -d -t $TMUX_SESSION_NAME -n "runner_${WINDOW_COUNT}"
 	# get new tmux window name and attach it to the logs
-	tmux send-keys -t "runner_${WINDOW_COUNT}" "cd $CONTROL_DIR/QControl/; matlab -nodisplay -nodesktop -logfile ${MATLAB_OUT}_${WINDOW_COUNT} -r 'setup_env(); j = Job(); j.get_and_run(); exit;' "  C-m
+	tmux send-keys -t "runner_${WINDOW_COUNT}" "cd $CONTROL_DIR/QControl/; matlab -nodisplay -nodesktop -logfile ${MATLAB_OUT}_${WINDOW_COUNT} -r '${MATLAB_COMMAND}' "	C-m
 	# update theh window count to give each window a unique ID 
 	((WINDOW_COUNT++))
 }
