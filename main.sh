@@ -48,6 +48,7 @@ self_update() {
 }
 
 main () {
+    mkdir -p $LOCKFILE_DIR
 	lock $PROGNAME || exit 1
 	self_update
 	cd ~/scheduler
