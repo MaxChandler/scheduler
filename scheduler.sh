@@ -209,7 +209,7 @@ clear_log () {
 setup_directories () {
 	mkdir -p $CONTROL_DIR &> /dev/null
 	chmod 700 $ROOT_DIR
-	log "setup directories : $ROOT_DIR"
+	log "setup directory : $CONTROL_DIR"
 }
 
 email_stop () {
