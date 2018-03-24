@@ -83,5 +83,7 @@ main () {
 	tmux send-keys -t $TMUX_WINDOW_NAME "./scheduler.sh" C-m
 	tmux attach-session -t $TMUX_SESSION_NAME
 }
+
 trap clean_up_exit EXIT
+
 main

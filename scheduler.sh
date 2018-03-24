@@ -234,7 +234,7 @@ update_code () {
 		log "cloning code from $GIT_URL"
 		ssh-agent bash -c "ssh-add /home/${USER}/.ssh/id_rsa &>/dev/null; git -C $ROOT_DIR clone --depth 1 $GIT_URL &>/dev/null;"
 	else
-		log "force pulling from qyber.black"
+		log "force pulling from $GIT_URL"
 		ssh-agent bash -c "ssh-add /home/${USER}/.ssh/id_rsa &>/dev/null; git -C $CONTROL_DIR pull --force &>/dev/null;"
 		if (( $? != 0 )); then
 			error_log "Error updating code from git repository";
