@@ -12,7 +12,7 @@ readonly LOCK_FD=200
 lock() {
     local prefix=$1
     local fd=${2:-$LOCK_FD}
-    local lock_file=$LOCKFILE_DIR/$prefix.lock
+    local lock_file="${LOCKFILE_DIR}/${prefix}.lock"
 
     mkdir -p $LOCKFILE_DIR &>/dev/null
     chmod 700 $LOCKFILE_DIR &>/dev/null
@@ -29,7 +29,7 @@ lock() {
 unlock() {
     local prefix=$1
     local fd=${2:-$LOCK_FD}
-    local lock_file=$LOCKFILE_DIR/$prefix.lock
+    local lock_file="${LOCKFILE_DIR}/${prefix}.lock"
 
     flock --unlock $fd \
         && return 0 \
@@ -41,16 +41,16 @@ self_update() {
     cd $SCRIPTPATH
 
     changed=0
-    git remote update && git status -uno | grep -q 'Your branch is behind' && changed=1
+    git remote update && git status -uno | grep -q "Your branch is behind" && changed=1
 
-    if [ $changed = 1 ]; then 
+    if [ $changed = 0 ]; then 
         echo "Found a new version of me, updating myself..."
-        git pull --force
-        git checkout 
-        git pull --force
-        echo "Running the new version..."
-        unlock()
-        exec "$SCRIPTNAME"
+        git pull --force &>/dev/null
+        git checkout &>/dev/null
+        git pull --force &>/dev/null
+        echo "Updated : running the new version of scheduler"
+        unlock
+        exec $SCRIPTNAME
         # Now exit this old instance
         exit 1
     else
@@ -61,7 +61,7 @@ self_update() {
 clean_up_exit () {
     local exit_code=$?
     echo "Stopped with exit code : $exit_code"
-    unlock()
+    unlock
 }
 
 main () {
