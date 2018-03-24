@@ -231,7 +231,7 @@ email_stop () {
 update_code () {
 	git -C $CONTROL_DIR status&>/dev/null
 	if [[ $? == 128 ]]; then
-		log "cloning code from qyber.black"
+		log "cloning code from $GIT_URL"
 		ssh-agent bash -c "ssh-add /home/${USER}/.ssh/id_rsa &>/dev/null; git -C $ROOT_DIR clone --depth 1 $GIT_URL &>/dev/null;"
 	else
 		log "force pulling from qyber.black"
