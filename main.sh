@@ -37,6 +37,7 @@ unlock() {
 }
 
 self_update() {
+    # this comment is to test the update funciton 
     git fetch
     cd $SCRIPTPATH
 
