@@ -6,6 +6,7 @@ declare -r ERRLOG=${ROOT_DIR}scheduler.error_log
 declare -r MATLAB_OUT=${ROOT_DIR}matlab.output
 declare -r TMUX_SESSION_NAME='scheduler'
 declare -r RAM_LIMIT=85
+declare -r GIT_URL='git@github.com:MaxChandler/control.git'
 
 declare MATLAB_COMMAND='try; setup_env(); j=Job(); j.get_and_run(); exit; catch err; exit; end;'
 declare PAUSED=0
@@ -231,7 +232,7 @@ update_code () {
 	git -C $CONTROL_DIR status&>/dev/null
 	if [[ $? == 128 ]]; then
 		log "cloning code from qyber.black"
-		ssh-agent bash -c "ssh-add /home/${USER}/.ssh/id_rsa &>/dev/null; git -C $ROOT_DIR clone git@qyber.black:MRIS/control.git &>/dev/null;"
+		ssh-agent bash -c "ssh-add /home/${USER}/.ssh/id_rsa &>/dev/null; git -C $ROOT_DIR clone --depth 1 $GIT_URL &>/dev/null;"
 	else
 		log "force pulling from qyber.black"
 		ssh-agent bash -c "ssh-add /home/${USER}/.ssh/id_rsa &>/dev/null; git -C $CONTROL_DIR pull --force &>/dev/null;"
