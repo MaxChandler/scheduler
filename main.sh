@@ -43,7 +43,7 @@ self_update() {
     changed=0
     git remote update && git status -uno | grep -q "Your branch is behind" && changed=1
 
-    if [ $changed = 0 ]; then 
+    if [ $changed = 1 ]; then 
         echo "Found a new version of me, updating myself..."
         git pull --force &>/dev/null
         git checkout &>/dev/null
