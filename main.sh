@@ -26,6 +26,16 @@ lock() {
         || return 1
 }
 
+unlock() {
+    local prefix=$1
+    local fd=${2:-$LOCK_FD}
+    local lock_file=$LOCKFILE_DIR/$prefix.lock
+
+    flock --unlock $fd \
+        && return 0 \
+        || return 1
+}
+
 self_update() {
     git fetch
     cd $SCRIPTPATH
@@ -39,12 +49,19 @@ self_update() {
         git checkout 
         git pull --force
         echo "Running the new version..."
+        unlock()
         exec "$SCRIPTNAME"
         # Now exit this old instance
         exit 1
     else
         echo "Already the latest version."
     fi
+}
+
+clean_up_exit () {
+    local exit_code=$?
+    echo "Stopped with exit code : $exit_code"
+    unlock()
 }
 
 main () {
@@ -65,4 +82,5 @@ main () {
 	tmux send-keys -t $TMUX_WINDOW_NAME "./scheduler.sh" C-m
 	tmux attach-session -t $TMUX_SESSION_NAME
 }
+trap clean_up_exit EXIT
 main
