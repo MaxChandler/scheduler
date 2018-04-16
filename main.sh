@@ -23,7 +23,7 @@ lock() {
     # acquier the lock
     flock -n $fd \
         && return 0 \
-        || return 1
+        || return 0
 }
 
 unlock() {
@@ -60,8 +60,10 @@ self_update() {
 
 clean_up_exit () {
     local exit_code=$?
-    echo "Stopped with exit code : $exit_code"
-    unlock
+    if [[ $exit_code != 0 ]]; then
+        echo "Stopped with exit code : $exit_code"
+        unlock
+    fi
 }
 
 main () {
