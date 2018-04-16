@@ -38,9 +38,8 @@ unlock() {
 
 self_update() {
     # this comment is to test the update funciton 
-    git fetch
     cd $SCRIPTPATH
-
+    git fetch
     changed=0
     git remote update && git status -uno | grep -q "Your branch is behind" && changed=1
 
