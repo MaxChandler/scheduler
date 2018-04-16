@@ -23,7 +23,7 @@ lock() {
     # acquier the lock
     flock -n $fd \
         && return 0 \
-        || return 0
+        || return 1
 }
 
 unlock() {
@@ -58,13 +58,13 @@ self_update() {
     fi
 }
 
-clean_up_exit () {
-    local exit_code=$?
-    if [[ $exit_code != 0 ]]; then
-        echo "Stopped with exit code : $exit_code"
-        unlock
-    fi
-}
+# clean_up_exit () {
+#     local exit_code=$?
+#     if [[ $exit_code != 0 ]]; then
+#         echo "Stopped with exit code : $exit_code"
+#     fi
+#     unlock
+# }
 
 main () {
     mkdir -p $LOCKFILE_DIR
@@ -85,6 +85,6 @@ main () {
 	tmux attach-session -t $TMUX_SESSION_NAME
 }
 
-trap clean_up_exit EXIT
+# trap clean_up_exit EXIT
 
 main
