@@ -68,7 +68,7 @@ clean_up_exit () {
 
 main () {
     mkdir -p $LOCKFILE_DIR
-	lock $PROGNAME || exit 1
+	lock $PROGNAME || exit 0
 	self_update
 	cd ~/scheduler
 	if ! tmux ls > /dev/null 2>&1 ; then
