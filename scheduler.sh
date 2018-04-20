@@ -21,11 +21,11 @@ main () {
 	setup
 	while true ; do
 		spawn_process
-		sleep 10s # this allows proccesses to be spawned correctly
+		sleep 60s # this allows proccesses to be spawned correctly
 		if check_load ; then
 			log "memory usage is higher than $RAM_LIMIT percent, killng processes"
 			kill_processes
-			sleep 45m
+			sleep 15m
 		else
 			# there's another user on the system
 			while relax ; do
@@ -37,7 +37,7 @@ main () {
 				sleep 5s
 			done
 			resume_processes
-			sleep 25s # allow the processes to spawn back up after being resumed before being killed instantly.
+			sleep 60s # allow the processes to spawn back up after being resumed before being killed instantly.
 		fi
 		# check to see if any processes have stalled
 		check_processes
