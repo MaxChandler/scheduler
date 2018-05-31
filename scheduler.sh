@@ -59,6 +59,13 @@ check_load () {
 }
 
 check () {
+    # if the machine cannot connect to the internet, there's no point running this script as the repos cannot update
+    ping -c1 google.com &>/dev/null
+    if [ $? -eq 2 ]; then
+        error_log "Machine is not connected to the internet, stopping scheduler as a connection is required to update repositories."
+        exit 0
+    fi 
+
 	# consistency checks : if there are pre-existing errors, then stop running
 	if [ -f $ERRLOG ]; then
 		error_log "Errors found, exiting"
