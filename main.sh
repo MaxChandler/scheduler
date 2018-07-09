@@ -10,6 +10,10 @@ readonly LOCKFILE_DIR=/tmp/${USER}
 readonly LOCK_FD=200
 
 check(){
+    # this stops errors when the machines become disconnected from the fileserver
+    if [ ! -d "/home/${USER}/" ]; then
+        exit 0
+    fi
     # if the machine cannot connect to the internet, there's no point running this script as the repos cannot update
     ping -c1 google.com &>/dev/null
     if [ $? -eq 2 ]; then
@@ -75,9 +79,9 @@ self_update() {
 # }
 
 main () {
-    mkdir -p $LOCKFILE_DIR
-	lock $PROGNAME || exit 0
 	check
+    mkdir -p $LOCKFILE_DIR
+    lock $PROGNAME || exit 0
     self_update
 	cd ~/scheduler
 	if ! tmux ls > /dev/null 2>&1 ; then
