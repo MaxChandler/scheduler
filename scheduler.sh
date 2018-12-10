@@ -5,7 +5,7 @@ declare -r LOGFILE=${ROOT_DIR}scheduler.log
 declare -r ERRLOG=${ROOT_DIR}scheduler.error_log
 declare -r MATLAB_OUT=${ROOT_DIR}matlab.output
 declare -r TMUX_SESSION_NAME='scheduler'
-declare -r RAM_LIMIT=85
+declare -r RAM_LIMIT=90
 declare -r GIT_URL='git@github.com:MaxChandler/control.git'
 
 declare MATLAB_COMMAND='try; setup_env(); j=Job(); j.get_and_run(); exit; catch err; exit; end;'
@@ -13,6 +13,7 @@ declare PAUSED=0
 declare WINDOW_COUNT=0
 declare MAX_NUM_PROCS=0
 declare IDLE_CPU_LIM=2
+declare CORES_PER_PROCESS=8
 
 main () {
 	is_running
@@ -21,11 +22,11 @@ main () {
 	setup
 	while true ; do
 		spawn_process
-		sleep 60s # this allows proccesses to be spawned correctly
+		sleep 90s # this allows proccesses to be spawned correctly
 		if check_load ; then
 			log "memory usage is higher than $RAM_LIMIT percent, killng processes"
 			kill_processes
-			sleep 15m
+			sleep 5m
 		else
 			# there's another user on the system
 			while relax ; do
@@ -37,7 +38,7 @@ main () {
 				sleep 5s
 			done
 			resume_processes
-			sleep 60s # allow the processes to spawn back up after being resumed before being killed instantly.
+			sleep 90s # allow the processes to spawn back up after being resumed before being killed instantly.
 		fi
 		# check to see if any processes have stalled
 		check_processes
@@ -94,7 +95,7 @@ set_num_cores () {
 }
 
 set_max_num_procs (){
-	MAX_NUM_PROCS=$(($n_cores/4))
+	MAX_NUM_PROCS=$(($n_cores/$CORES_PER_PROCESS))
 	if [[ $MAX_NUM_PROCS == 0 ]]; then
 		MAX_NUM_PROCS=1
 	fi 
@@ -113,7 +114,7 @@ spawn_process () {
 		while (( "$n_procs" < "$MAX_NUM_PROCS" )) ; do
 			log "space for more processes : $n_procs processes running on $n_cores cores: spawning one more"
 			start_process
-			sleep 5s
+			sleep 10s
 			num_processes
 		done
 	fi

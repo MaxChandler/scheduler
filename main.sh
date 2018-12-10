@@ -52,10 +52,11 @@ self_update() {
     # this comment is to test the update funciton 
     cd $SCRIPTPATH
     git fetch
-    changed=0
-    git remote update && git status -uno | grep -q "Your branch is behind" && changed=1
+    changed=1;
+    git remote update &> /dev/null && git status -uno | grep -q "Your branch is behind"; changed=$?;
 
-    if [ $changed = 1 ]; then 
+    if [ $changed == 0 ]; then 
+        # don't forget that bash is reverse, 0 == true/OK, 1 = false.
         echo "Found a new version of me, updating myself..."
         git pull --force &>/dev/null
         git checkout &>/dev/null
