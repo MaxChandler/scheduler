@@ -66,8 +66,6 @@ self_update() {
         exec $SCRIPTNAME
         # Now exit this old instance
         exit 1
-    else
-        echo "Already the latest version."
     fi
 }
 
@@ -86,11 +84,11 @@ main () {
     self_update
 	cd ~/scheduler
 	if ! tmux ls > /dev/null 2>&1 ; then
-		tmux new-session -d -s "$TMUX_SESSION_NAME" -n $TMUX_WINDOW_NAME
+		tmux new-session -d -s $TMUX_SESSION_NAME -n $TMUX_WINDOW_NAME
 	else
-		if ! tmux list-sessions | grep "$TMUX_SESSION_NAME">/dev/null; then
-			tmux new-session -d -s "$TMUX_SESSION_NAME"
-			if ! tmux list-windows | grep $TMUX_WINDOW_NAME>/dev/null; then
+		if ! tmux list-sessions | grep -q $TMUX_SESSION_NAME; then
+			tmux new-session -d -s $TMUX_SESSION_NAME
+			if ! tmux list-windows | grep -q $TMUX_WINDOW_NAME; then
 				tmux new-window -n $TMUX_WINDOW_NAME
 			fi
 		fi
