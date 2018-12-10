@@ -67,16 +67,27 @@ check () {
         exit 0
     fi 
 
+    # check the databse server
+    ping -c1 ventoux.cs.cf.ac.uk &>/dev/null
+    if [ $? -eq 2 ]; then
+        error_log "Cannot reach the database server ventoux.cs.cf.ac.uk, but I can reach 'Google.com'. Exiting. "
+        exit 0
+    fi 
+
 	# consistency checks : if there are pre-existing errors, then stop running
 	if [ -f $ERRLOG ]; then
 		error_log "Errors found, exiting"
 		exit
 	fi
+
 	# make sure all the programs we need are installed!
+	# could probably turn this into a loop...
 	if ! type tmux >/dev/null 2>/dev/null; then
   		error_log "tmux is not installed"
   		exit
-	elif ! type matlab >/dev/null 2>/dev/null; then
+	fi
+
+	if ! type matlab >/dev/null 2>/dev/null; then
   		error_log "matlab is not installed"
   		exit
 	fi

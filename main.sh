@@ -19,6 +19,12 @@ check(){
     if [ $? -eq 2 ]; then
         exit 0
     fi 
+    
+    # check the databse server
+    ping -c1 ventoux.cs.cf.ac.uk &>/dev/null
+    if [ $? -eq 2 ]; then
+        exit 0
+    fi 
 }
 
 lock() {
