@@ -191,14 +191,7 @@ stop_processes () {
 }
 
 kill_processes () {
-	if pgrep -u $USER "MATLAB" > /dev/null ; then
-		pkill -u $USER "MATLAB"
-		log 'Killed MATLAB'
-	fi
-	if  tmux list-windows | grep "$TMUX_SESSION_NAME">/dev/null; then
-		tmux kill-window -t $TMUX_SESSION_NAME
-		log "killed tmux window $TMUX_SESSION_NAME"
-	fi
+	stop_processes
 	email_stop
 	exit
 }
@@ -266,7 +259,7 @@ start_process () {
 	# then we send the keys to create the next session
 	log "starting new tmux window : runner_${WINDOW_COUNT}"
 	tmux new-window -d -t $TMUX_SESSION_NAME -n "runner_${WINDOW_COUNT}"
-	# get new tmux window name and attach it to the logs
+	# get new tmux window name and attach it to the logs | C-m == Enter
 	tmux send-keys -t "runner_${WINDOW_COUNT}" "cd $CONTROL_DIR/QControl/; matlab -nodisplay -nodesktop -logfile ${MATLAB_OUT}_${WINDOW_COUNT} -r '${MATLAB_COMMAND}' "	C-m
 	# update theh window count to give each window a unique ID 
 	((WINDOW_COUNT++))

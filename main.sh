@@ -99,6 +99,7 @@ main () {
 			fi
 		fi
 	fi
+    sleep 1s
 	tmux send-keys -t $TMUX_WINDOW_NAME "./scheduler.sh" C-m
 	tmux attach-session -t $TMUX_SESSION_NAME
 }
