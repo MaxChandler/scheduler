@@ -22,26 +22,16 @@ main () {
 	setup
 	while true ; do
 		spawn_process
-		sleep 90s # this allows proccesses to be spawned correctly
-		if check_load ; then
-			log "memory usage is higher than $RAM_LIMIT percent, killng processes"
-			kill_processes
-			sleep 5m
-		else
-			# there's another user on the system
-			while relax ; do
-				pause_processes
-				if check_load ; then
-					log "memory usage is higher than $RAM_LIMIT percent, killng processes"
-					kill_processes
-				fi
-				sleep 5s
-			done
-			resume_processes
-			sleep 90s # allow the processes to spawn back up after being resumed before being killed instantly.
-		fi
-		# check to see if any processes have stalled
-		check_processes
+		while relax ; do  # there's another user on the system
+			pause_processes
+			if check_load ; then
+				log "memory usage is higher than $RAM_LIMIT percent and there is another user on this machine: killng processes"
+				kill_processes
+			fi
+			sleep 10s
+		done
+		resume_processes # allow the processes to spawn back up after being resumed before being killed instantly.
+		check_processes # check to see if any processes have stalled
 	done
 }
 
@@ -54,9 +44,8 @@ is_running () {
 check_load () {
 	if (( $( free -m | awk 'NR==2{printf "%.f", $3*100/$2 }') > $RAM_LIMIT )) ; then
 		return 0
-	else
-		return 1
 	fi
+    return 1
 }
 
 check () {
@@ -119,8 +108,6 @@ num_processes () {
 
 spawn_process () {
 	if [[ $PAUSED == 0 ]]; then
-		# log "checking if there's room for more processes"
-		# Update the number of processes
 		num_processes
 		while (( "$n_procs" < "$MAX_NUM_PROCS" )) ; do
 			log "space for more processes : $n_procs processes running on $n_cores cores: spawning one more"
@@ -132,8 +119,6 @@ spawn_process () {
 }
 
 check_processes () {
-	# IF NOT PAUSED!
-	# log "checking processes"
 	pane_pids=$(tmux list-windows -t $TMUX_SESSION_NAME -F "#{window_name} #{pane_pid}" | grep -v "control" | awk '{print $2}')
 	if [[ $PAUSED == 0 ]]; then
 		for pane_pid in $pane_pids; do
@@ -176,6 +161,7 @@ resume_processes () {
 			fi
 		done
 		log "matlab resumed"
+		pause 5s
 	fi
 }
 

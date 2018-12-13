@@ -91,15 +91,17 @@ main () {
 	cd ~/scheduler
 	if ! tmux ls > /dev/null 2>&1 ; then
 		tmux new-session -d -s $TMUX_SESSION_NAME -n $TMUX_WINDOW_NAME
+        sleep 3s
 	else
 		if ! tmux list-sessions | grep -q $TMUX_SESSION_NAME; then
 			tmux new-session -d -s $TMUX_SESSION_NAME
+            sleep 3s
 			if ! tmux list-windows | grep -q $TMUX_WINDOW_NAME; then
 				tmux new-window -n $TMUX_WINDOW_NAME
 			fi
 		fi
 	fi
-    sleep 1s
+    sleep 3s
 	tmux send-keys -t $TMUX_WINDOW_NAME "./scheduler.sh" C-m
 	tmux attach-session -t $TMUX_SESSION_NAME
 }
