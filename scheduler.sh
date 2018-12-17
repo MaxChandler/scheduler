@@ -233,7 +233,7 @@ update_code () {
 		log "cloning code from $GIT_URL"
 		ssh-agent bash -c "ssh-add /home/${USER}/.ssh/id_rsa &>/dev/null; git -C $ROOT_DIR clone --depth 1 $GIT_URL &>/dev/null;"
 		log "updating submodules"
-		ssh-agent bash -c "ssh-add /home/${USER}/.ssh/id_rsa &>/dev/null; git -C $ROOT_DIR submodule init &>/dev/null; git -C $ROOT_DIR submodule update &>/dev/null;"
+		ssh-agent bash -c "ssh-add /home/${USER}/.ssh/id_rsa &>/dev/null; git -C $ROOT_DIR submodule init &>/dev/null && git -C $ROOT_DIR submodule update &>/dev/null;"
 	else
 		log "force pulling from $GIT_URL"
 		ssh-agent bash -c "ssh-add /home/${USER}/.ssh/id_rsa &>/dev/null; git -C $CONTROL_DIR pull --force &>/dev/null;"
