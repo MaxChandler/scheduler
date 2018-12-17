@@ -98,6 +98,7 @@ main () {
             sleep 3s
 			if ! tmux list-windows | grep -q $TMUX_WINDOW_NAME; then
 				tmux new-window -n $TMUX_WINDOW_NAME
+                sleep 3s
 			fi
 		fi
 	fi
