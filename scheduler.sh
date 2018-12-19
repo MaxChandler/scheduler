@@ -13,8 +13,8 @@ declare PAUSED=0
 declare WINDOW_COUNT=0
 declare MAX_NUM_PROCS=0
 declare IDLE_CPU_LIM=2
-declare CORES_PER_PROCESS=100
-# declare CORES_PER_PROCESS=8
+# declare CORES_PER_PROCESS=100
+declare CORES_PER_PROCESS=4
 
 main () {
 	is_running
