@@ -12,8 +12,7 @@ declare MATLAB_COMMAND='try; setup_env(); j=Job(); j.get_and_run(); exit; catch 
 declare PAUSED=0
 declare WINDOW_COUNT=0
 declare MAX_NUM_PROCS=0
-declare IDLE_CPU_LIM=2
-# declare CORES_PER_PROCESS=100
+declare IDLE_CPU_LIM=0
 declare CORES_PER_PROCESS=4
 
 main () {
@@ -113,14 +112,14 @@ spawn_process () {
 		while (( "$n_procs" < "$MAX_NUM_PROCS" )) ; do
 			log "space for more processes : $n_procs processes running on $n_cores cores: spawning one more"
 			start_process
-			sleep 30s
+			sleep 5s
 			num_processes
 		done
 	fi
 }
 
 check_processes () {
-	pane_pids=$(tmux list-windows -t $TMUX_SESSION_NAME -F "#{window_name} #{pane_pid}" | grep -v "control" | awk '{print $2}')
+	pane_pids=( $(tmux list-windows -t $TMUX_SESSION_NAME -F "#{window_name} #{pane_pid}" | grep -v "control" | awk '{print $2}') )
 	if [[ $PAUSED == 0 ]]; then
 		for pane_pid in $pane_pids; do
 			child_pid=$(pgrep -P $pane_pid)
@@ -133,7 +132,7 @@ check_processes () {
 				# 	tmux kill-window -t $( tmux list-windows -t $TMUX_SESSION_NAME -F "#{window_name} #{pane_pid}" | grep $pane_pid | awk '{print $1'})
 				# 	email_stop
 				# else
-				#	log "looks ok - leave it as is : cpu usage is $cpu_usage"
+				# 	log "looks ok - leave it as is : cpu usage is $cpu_usage"
 				# fi
 			else
 				log "tmux pane has no child process associated with it (process must have finished and exited) : closing tmux pane."	
@@ -240,7 +239,7 @@ update_code () {
 		fi
 	fi 
 	log "updating submodules"
-	ssh-agent bash -c "ssh-add /home/${USER}/.ssh/id_rsa && git -C ${CONTROL_DIR} submodule init && git -C ${CONTROL_DIR} submodule update;"
+	ssh-agent bash -c "ssh-add /home/${USER}/.ssh/id_rsa &>/dev/null && git -C ${CONTROL_DIR} submodule init && git -C ${CONTROL_DIR} submodule update;"
 }
 
 start_process () {

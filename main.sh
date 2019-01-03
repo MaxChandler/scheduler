@@ -10,7 +10,7 @@ readonly LOCKFILE_DIR=/tmp/${USER}
 readonly LOCK_FD=200
 
 check(){
-    # this stops errors when the machines become disconnected from the fileserver
+    # this stops errors when the machines become disconnected from the fileserver which is mounted on /home/$USER on some machines
     if [ ! -d "/home/${USER}/" ]; then
         exit 0
     fi
@@ -25,6 +25,11 @@ check(){
     if [ $? -eq 2 ]; then
         exit 0
     fi 
+
+    if ! type tmux >/dev/null 2>/dev/null; then
+        error_log "tmux is not installed"
+        exit
+    fi
 }
 
 lock() {
