@@ -1,6 +1,6 @@
 #!/bin/bash
-declare -r ROOT_DIR=/tmp/$USER/
-declare -r CONTROL_DIR=/tmp/$USER/control/
+declare -r ROOT_DIR=/tmp/${USER}/code/
+declare -r CONTROL_DIR=${ROOT_DIR}/control/
 declare -r LOGFILE=${ROOT_DIR}scheduler.log
 declare -r ERRLOG=${ROOT_DIR}scheduler.error_log
 declare -r MATLAB_OUT=${ROOT_DIR}matlab.output

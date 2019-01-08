@@ -5,9 +5,10 @@ SCRIPTNAME="$0"
 
 declare -r TMUX_SESSION_NAME='scheduler'
 declare -r TMUX_WINDOW_NAME='control'
-readonly PROGNAME=$(basename "$0")
-readonly LOCKFILE_DIR=/tmp/${USER}
-readonly LOCK_FD=200
+declare -r PROGNAME=$(basename "$0")
+declare -r ROOT_DIR=/tmp/${USER}
+declare -r CODE_DIR=${ROOT_DIR}/code/
+declare -r LOCK_FD=200
 
 check(){
     # this stops errors when the machines become disconnected from the fileserver which is mounted on /home/$USER on some machines
@@ -35,10 +36,10 @@ check(){
 lock() {
     local prefix=$1
     local fd=${2:-$LOCK_FD}
-    local lock_file="${LOCKFILE_DIR}/${prefix}.lock"
+    local lock_file="${ROOT_DIR}/${prefix}.lock"
 
-    mkdir -p $LOCKFILE_DIR &>/dev/null
-    chmod 700 $LOCKFILE_DIR &>/dev/null
+    mkdir -p $ROOT_DIR &>/dev/null
+    chmod 700 $ROOT_DIR &>/dev/null
 
     # create lock file
     eval "exec $fd>$lock_file"
@@ -52,7 +53,7 @@ lock() {
 unlock() {
     local prefix=$1
     local fd=${2:-$LOCK_FD}
-    local lock_file="${LOCKFILE_DIR}/${prefix}.lock"
+    local lock_file="${ROOT_DIR}/${prefix}.lock"
 
     flock --unlock $fd \
         && return 0 \
@@ -90,8 +91,8 @@ self_update() {
 
 main () {
 	check
-    mkdir -p $LOCKFILE_DIR
     lock $PROGNAME || exit 0
+    rm -rf $CODE_DIR # a fresh start!
     self_update
 	cd ~/scheduler
 	if ! tmux ls > /dev/null 2>&1 ; then
