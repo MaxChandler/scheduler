@@ -6,7 +6,7 @@ SCRIPTNAME="$0"
 declare -r TMUX_SESSION_NAME='scheduler'
 declare -r TMUX_WINDOW_NAME='control'
 declare -r PROGNAME=$(basename "$0")
-declare -r ROOT_DIR=/tmp/${USER}
+declare -r ROOT_DIR=/tmp/${USER}/scheduler/
 declare -r CODE_DIR=${ROOT_DIR}/code/
 declare -r LOCK_FD=200
 
@@ -93,6 +93,7 @@ main () {
 	check
     lock $PROGNAME || exit 0
     rm -rf $CODE_DIR # a fresh start!
+    log "deleted old code base from ${CODE_DIR}"
     self_update
 	cd ~/scheduler
 	if ! tmux ls > /dev/null 2>&1 ; then

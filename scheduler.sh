@@ -1,5 +1,5 @@
 #!/bin/bash
-declare -r ROOT_DIR=/tmp/${USER}/code/
+declare -r ROOT_DIR=/tmp/${USER}/scheduler/code/
 declare -r CONTROL_DIR=${ROOT_DIR}/control/
 declare -r LOGFILE=${ROOT_DIR}scheduler.log
 declare -r ERRLOG=${ROOT_DIR}scheduler.error_log
@@ -7,8 +7,8 @@ declare -r MATLAB_OUT=${ROOT_DIR}matlab.output
 declare -r TMUX_SESSION_NAME='scheduler'
 declare -r RAM_LIMIT=90
 declare -r GIT_URL='git@github.com:MaxChandler/control.git'
+declare -r MATLAB_COMMAND='try; setup_env(); j=Job(); j.get_and_run(); exit; catch err; exit; end;'
 
-declare MATLAB_COMMAND='try; setup_env(); j=Job(); j.get_and_run(); exit; catch err; exit; end;'
 declare PAUSED=0
 declare WINDOW_COUNT=0
 declare MAX_NUM_PROCS=0
