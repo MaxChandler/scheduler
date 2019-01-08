@@ -93,7 +93,6 @@ main () {
 	check
     lock $PROGNAME || exit 0
     rm -rf $CODE_DIR # a fresh start!
-    log "deleted old code base from ${CODE_DIR}"
     self_update
 	cd ~/scheduler
 	if ! tmux ls > /dev/null 2>&1 ; then
