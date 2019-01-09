@@ -123,7 +123,7 @@ check_processes () {
 	if [[ $PAUSED == 0 ]]; then
 		for pane_pid in $pane_pids; do
 			child_pid=$(pgrep -P $pane_pid)
-			if [$? -eq 1 ]; then
+			if [ $? -eq 1 ]; then
 				log "tmux pane has no child process associated with it (process must have finished and exited) : closing tmux pane."	
 				tmux kill-window -t $(tmux list-windows -t $TMUX_SESSION_NAME -F "#{window_name} #{pane_pid}" | grep $pane_pid | awk '{print $1}')
 			fi
