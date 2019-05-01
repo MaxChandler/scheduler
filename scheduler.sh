@@ -7,7 +7,7 @@ declare -r MATLAB_OUT=${ROOT_DIR}matlab.output
 declare -r TMUX_SESSION_NAME='scheduler'
 declare -r RAM_LIMIT=90
 declare -r GIT_URL='git@github.com:MaxChandler/control.git'
-declare -r MATLAB_COMMAND='try; setup_env(); j=Job(); j.get_and_run(); exit; catch err; throw(err); exit; end;'
+declare -r MATLAB_COMMAND='try; setup_env(); j=Job(); j.get_and_run(); exit; catch err; rethrow(err); exit; end; quit;'
 
 declare PAUSED=0
 declare WINDOW_COUNT=0
@@ -248,8 +248,16 @@ start_process () {
 	# then we send the keys to create the next session
 	log "starting new tmux window : runner_${WINDOW_COUNT}"
 	tmux new-window -d -t $TMUX_SESSION_NAME -n "runner_${WINDOW_COUNT}"
+
+	# pause and give the window a second to initialise
+	sleep 5s
+	
 	# get new tmux window name and attach it to the logs | C-m == Enter
-	tmux send-keys -t "runner_${WINDOW_COUNT}" "cd $CONTROL_DIR/QControl/; matlab -nodisplay -nodesktop -logfile ${MATLAB_OUT}_${WINDOW_COUNT} -r '${MATLAB_COMMAND}'; exit; exit "	C-m
+	tmux send-keys -t "runner_${WINDOW_COUNT}" "cd $CONTROL_DIR/QControl/; matlab -nodisplay -nodesktop -logfile ${MATLAB_OUT}_${WINDOW_COUNT} -r '${MATLAB_COMMAND}'; exit; exit;"	C-m
+
+	# send an additional quit to be interpreted in the case that there is an error that is thrown...
+	tmux send-keys -t "runner_${WINDOW_COUNT}" "quit;"	C-m
+	
 	# update theh window count to give each window a unique ID 
 	((WINDOW_COUNT++))
 }
