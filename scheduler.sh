@@ -254,9 +254,6 @@ start_process () {
 	
 	# get new tmux window name and attach it to the logs | C-m == Enter
 	tmux send-keys -t "runner_${WINDOW_COUNT}" "cd $CONTROL_DIR/QControl/; matlab -nodisplay -nodesktop -logfile ${MATLAB_OUT}_${WINDOW_COUNT} -r '${MATLAB_COMMAND}'; exit; exit;"	C-m
-
-	# send an additional quit to be interpreted in the case that there is an error that is thrown...
-	tmux send-keys -t "runner_${WINDOW_COUNT}" "quit;"	C-m
 	
 	# update theh window count to give each window a unique ID 
 	((WINDOW_COUNT++))
