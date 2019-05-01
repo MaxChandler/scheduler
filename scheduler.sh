@@ -7,7 +7,7 @@ declare -r MATLAB_OUT=${ROOT_DIR}matlab.output
 declare -r TMUX_SESSION_NAME='scheduler'
 declare -r RAM_LIMIT=90
 declare -r GIT_URL='git@github.com:MaxChandler/control.git'
-declare -r MATLAB_COMMAND='try; setup_env(); j=Job(); j.get_and_run(); exit; catch err; exit; end;'
+declare -r MATLAB_COMMAND='try; setup_env(); j=Job(); j.get_and_run(); exit; catch err; throw(err); exit; end;'
 
 declare PAUSED=0
 declare WINDOW_COUNT=0
